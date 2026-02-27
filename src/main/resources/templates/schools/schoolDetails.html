@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'schools')}">
+
+<body>
+
+<h2 class="text-center">Welcome to <span th:text="${school.name}">School Name</span></h2>
+
+<div class="container mt-4">
+
+  <div class="alert alert-info">
+    <h4 class="alert-heading">Coming Soon!</h4>
+    <p>Upcoming leagues, intramural events, and registration for
+      <strong th:text="${school.name}">this school</strong> will appear here shortly.
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>

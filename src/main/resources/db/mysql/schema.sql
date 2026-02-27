@@ -53,3 +53,76 @@ CREATE TABLE IF NOT EXISTS visits (
   description VARCHAR(255),
   FOREIGN KEY (pet_id) REFERENCES pets(id)
 ) engine=InnoDB;
+CREATE TABLE IF NOT EXISTS users (
+                                   id INT AUTO_INCREMENT PRIMARY KEY,
+                                   first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  nickname VARCHAR(50),
+  nickname_is_flagged TINYINT DEFAULT 0,
+  email VARCHAR(255) NOT NULL,
+  public_email TINYINT DEFAULT 0,
+  phone VARCHAR(255),
+  public_phone TINYINT DEFAULT 0,
+  password_hash VARCHAR(255),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME,
+  UNIQUE INDEX idx_users_email (email),
+  INDEX idx_users_name (last_name, first_name)
+  );
+
+CREATE TABLE IF NOT EXISTS roles (
+                                   id INT AUTO_INCREMENT PRIMARY KEY,
+                                   name VARCHAR(50) NOT NULL UNIQUE,
+  description VARCHAR(255)
+  );
+
+CREATE TABLE IF NOT EXISTS permissions (
+                                         id INT AUTO_INCREMENT PRIMARY KEY,
+                                         name VARCHAR(100) NOT NULL UNIQUE,
+  description VARCHAR(255)
+  );
+
+CREATE TABLE IF NOT EXISTS user_roles (
+                                        user_id INT NOT NULL,
+                                        role_id INT NOT NULL,
+                                        PRIMARY KEY (user_id, role_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+  );
+
+CREATE TABLE IF NOT EXISTS permission_role (
+                                             permission_id INT NOT NULL,
+                                             role_id INT NOT NULL,
+                                             PRIMARY KEY (permission_id, role_id),
+  FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+  );
+
+CREATE TABLE IF NOT EXISTS schools (
+                                     id INT AUTO_INCREMENT PRIMARY KEY,
+                                     name VARCHAR(255) NOT NULL,
+  domain VARCHAR(255) NOT NULL,
+  status_id ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED') DEFAULT 'ACTIVE',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME DEFAULT NULL,
+  UNIQUE INDEX idx_schools_domain (domain)
+  );
+
+CREATE TABLE IF NOT EXISTS locations (
+                                       id INT AUTO_INCREMENT PRIMARY KEY,
+                                       school_id INT NOT NULL,
+                                       parent_location_id INT NULL,
+                                       name VARCHAR(255) NOT NULL,
+  description TEXT,
+  address VARCHAR(255),
+  latitude DECIMAL(8,4),
+  longitude DECIMAL(8,4),
+  status_id ENUM('DRAFT', 'ACTIVE', 'CLOSED', 'COMING_SOON') DEFAULT 'ACTIVE',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME DEFAULT NULL,
+  CONSTRAINT fk_locations_school FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
+  CONSTRAINT fk_locations_parent FOREIGN KEY (parent_location_id) REFERENCES locations(id) ON DELETE SET NULL
+  );

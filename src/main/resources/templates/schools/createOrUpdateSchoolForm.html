@@ -1,0 +1,23 @@
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'schools')}">
+
+<body>
+
+<h2 th:text="#{addSchool}">Add School</h2>
+
+<form th:object="${school}" class="form-horizontal" id="add-school-form" method="post">
+
+  <input th:replace="~{fragments/inputField :: input (#{label.school.name},'name',  'text')}" />
+
+  <input th:replace="~{fragments/inputField :: input (#{label.school.domain},'domain',  'text')}" />
+
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button class="btn btn-primary" type="submit" th:text="#{addSchool}">Add School</button>
+    </div>
+  </div>
+
+</form>
+
+</body>
+</html>
