@@ -110,6 +110,48 @@ public class AuthController {
 		return Optional.empty();
 	}
 
+
+	/**
+	 * Show login page
+	 */
+	@GetMapping("/login")
+	public String showLoginPage() {
+		return "login";
+	}
+
+	/**
+	 * Show customer registration page
+	 */
+	@GetMapping("/register")
+	public String showRegisterPage(Model model) {
+		model.addAttribute("user", new User());
+		return "register";
+	}
+
+	/**
+	 * Process customer registration
+	 */
+	@PostMapping("/register")
+	public String processCustomerRegister(@Valid User user,
+										  BindingResult result,
+										  RedirectAttributes redirectAttributes) {
+		if (result.hasErrors()) {
+			return "register";
+		}
+
+		try {
+			// Register as customer (reuse existing student registration for now)
+			userService.registerNewStudent(user);
+			redirectAttributes.addFlashAttribute("messageSuccess",
+				"Registration successful! Please login.");
+			return "redirect:/login";
+		} catch (RuntimeException ex) {
+			result.rejectValue("email", "duplicateEmail",
+				"This email is already registered");
+			return "register";
+		}
+	}
+
 //	@PostMapping("/login")
 //	public ResponseEntity<String> authenticateUser(@RequestBody LoginRequest loginRequest) {
 	// 1. Create a token with the user's plain text credentials

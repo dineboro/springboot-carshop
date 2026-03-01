@@ -1,25 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'register')}">
-
 <head>
   <meta charset="UTF-8">
   <title>Register</title>
 </head>
-
 <body>
 
 <h2>Register New Account</h2>
 
 <p class="text-muted">Create your account to access the customer portal</p>
 
-<div th:if="${error}" class="alert alert-danger" th:text="${error}">
-  Error message
-</div>
-
-<div th:if="${success}" class="alert alert-success" th:text="${success}">
-  Success message
-</div>
-
+<!-- Registration Form -->
 <form th:action="@{/register}" th:object="${user}" method="post" class="form-horizontal">
 
   <div class="form-group">
@@ -28,9 +19,8 @@
       <input type="text"
              th:field="*{firstName}"
              class="form-control"
-             placeholder="Enter your first name"
-             required>
-      <span class="help-inline" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Error</span>
+             placeholder="Enter your first name">
+      <span class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Error</span>
     </div>
   </div>
 
@@ -40,71 +30,35 @@
       <input type="text"
              th:field="*{lastName}"
              class="form-control"
-             placeholder="Enter your last name"
-             required>
-      <span class="help-inline" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Error</span>
+             placeholder="Enter your last name">
+      <span class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Error</span>
     </div>
   </div>
 
   <div class="form-group">
-    <label class="col-sm-2 control-label">Email</label>
+    <label class="col-sm-2 control-label">Email *</label>
     <div class="col-sm-10">
       <input type="email"
              th:field="*{email}"
              class="form-control"
              placeholder="Enter your email address"
              required>
-      <span class="help-inline" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</span>
+      <span class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</span>
     </div>
   </div>
 
   <div class="form-group">
-    <label class="col-sm-2 control-label">Phone</label>
-    <div class="col-sm-10">
-      <input type="tel"
-             th:field="*{phone}"
-             class="form-control"
-             placeholder="Enter your phone number"
-             pattern="[0-9]{10}"
-             title="Please enter a 10-digit phone number">
-      <span class="help-inline" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Error</span>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label class="col-sm-2 control-label">Password</label>
+    <label class="col-sm-2 control-label">Password *</label>
     <div class="col-sm-10">
       <input type="password"
              th:field="*{password}"
              class="form-control"
              placeholder="Enter a strong password"
-             minlength="8"
              required>
-      <small class="form-text text-muted">Password must be at least 8 characters long</small>
-      <span class="help-inline" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</span>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label class="col-sm-2 control-label">Confirm Password</label>
-    <div class="col-sm-10">
-      <input type="password"
-             name="confirmPassword"
-             class="form-control"
-             placeholder="Re-enter your password"
-             minlength="8"
-             required>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" required>
-          I agree to the <a href="#" target="_blank">Terms and Conditions</a>
-        </label>
-      </div>
+      <small class="form-text text-muted">
+        Password must be at least 8 characters with uppercase, lowercase, and a number
+      </small>
+      <span class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</span>
     </div>
   </div>
 

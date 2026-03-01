@@ -21,28 +21,23 @@ public class SecurityConfig {
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-		// Make the AuthenticationManager (which knows about your UserDetailsService)
-		// available for injection in your controllers.
 		return config.getAuthenticationManager();
 	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf(csrf -> csrf.disable()) // Disable Cross-Site Request Forgery for API development
+			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorize -> authorize
-				// This allows unmapped paths to result in 404, and allows all web viewing.
 				.requestMatchers(HttpMethod.GET).permitAll()
 
-				// Allows guest users to make POST requests
-				.requestMatchers("/register-student", "/login", "/schools/new", "/owners/new").permitAll()
+				// ⬇️ ADD "/register" HERE
+				.requestMatchers("/register-student", "/register", "/login", "/schools/new", "/owners/new").permitAll()
 
-				// PROTECTED CATCH-ALL (This protects unlisted POST/PUT/DELETE, etc.)
 				.anyRequest().authenticated()
 			)
-			// Ensure all auto-challenge mechanisms are disabled
-			.httpBasic(AbstractHttpConfigurer::disable) // Disable the login popup
-			.formLogin(AbstractHttpConfigurer::disable); // Stop formLogin redirect
+			.httpBasic(AbstractHttpConfigurer::disable)
+			.formLogin(AbstractHttpConfigurer::disable);
 
 		return http.build();
 	}

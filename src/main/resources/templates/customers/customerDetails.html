@@ -3,50 +3,47 @@
 
 <head>
   <meta charset="UTF-8">
-  <title th:text="#{customerDetails}">Customer Details</title>
+  <title>Customer Details</title>
 </head>
 
 <body>
 
-<h2 th:text="#{customerInformation}">Customer Information</h2>
+<h2>Customer Information</h2>
 
 <!-- Customer Info Card -->
 <div class="card mb-4">
   <div class="card-body">
     <table class="table table-borderless">
       <tr>
-        <th style="width: 200px;" th:text="#{label.customer.name}">Customer Name</th>
+        <th style="width: 200px;">Customer Name</th>
         <td><strong th:text="${customer.customerName}">John Doe</strong></td>
       </tr>
       <tr>
-        <th th:text="#{label.customer.phone}">Phone</th>
+        <th>Phone</th>
         <td>
           <span class="fa fa-phone"></span>
           <a th:href="'tel:' + ${customer.phone}" th:text="${customer.phone}">555-1234</a>
         </td>
       </tr>
       <tr>
-        <th th:text="#{label.customer.email}">Email</th>
+        <th>Email</th>
         <td>
           <span class="fa fa-envelope"></span>
-          <a th:if="${customer.email}" th:href="'mailto:' + ${customer.email}" th:text="${customer.email}"><span class="__cf_email__" data-cfemail="b6d3dbd7dfdaf6d3ced7dbc6dad398d5d9db">[email&#160;protected]</span></a>
-          <span th:unless="${customer.email}" class="text-muted">N/A</span>
+          <a th:if="${customer.email != null}"
+             th:href="'mailto:' + ${customer.email}"
+             th:text="${customer.email}">email@example.com</a>
+          <span th:if="${customer.email == null}" class="text-muted">N/A</span>
         </td>
       </tr>
       <tr>
-        <th th:text="#{status}">Status</th>
+        <th>Status</th>
         <td>
-                    <span class="badge"
-                          th:classappend="${customer.status == 'ACTIVE'} ? 'badge-success' :
-                                          ${customer.status == 'INACTIVE'} ? 'badge-secondary' : 'badge-warning'"
-                          th:text="${customer.status}">
-                        ACTIVE
-                    </span>
+          <span class="badge badge-success" th:text="${customer.status}">ACTIVE</span>
         </td>
       </tr>
       <tr>
-        <th th:text="#{createdDate}">Created Date</th>
-        <td th:text="${#temporals.format(customer.createdDate, 'MMM dd, yyyy HH:mm')}">Jan 15, 2024 10:30</td>
+        <th>Created Date</th>
+        <td th:text="${customer.createdDate}">Jan 15, 2024 10:30</td>
       </tr>
     </table>
   </div>
@@ -55,13 +52,10 @@
 <!-- Action Buttons -->
 <div class="btn-group mb-4" role="group">
   <a class="btn btn-primary" th:href="@{/customers/{id}/edit(id=${customer.customerId})}">
-    <span class="fa fa-edit"></span> <span th:text="#{editCustomer}">Edit Customer</span>
-  </a>
-  <a class="btn btn-success" th:href="@{/customers/{id}/invite(id=${customer.customerId})}">
-    <span class="fa fa-envelope"></span> Send Portal Invitation
+    <span class="fa fa-edit"></span> Edit Customer
   </a>
   <a class="btn btn-secondary" th:href="@{/customers}">
-    <span class="fa fa-arrow-left"></span> <span th:text="#{button.back}">Back to List</span>
+    <span class="fa fa-arrow-left"></span> Back to List
   </a>
 </div>
 
@@ -69,69 +63,46 @@
 
 <!-- Vehicles Section -->
 <h3>
-  <span class="fa fa-car"></span> <span th:text="#{vehiclesAndServices}">Vehicles and Services</span>
+  <span class="fa fa-car"></span> Vehicles
 </h3>
 
-<div th:if="${!customer.vehicles.empty}">
+<div th:if="${customer.vehicles != null and !customer.vehicles.empty}">
   <table class="table table-striped">
     <thead>
     <tr>
-      <th th:text="#{label.vehicle.vin}">VIN</th>
-      <th th:text="#{label.vehicle.make}">Make</th>
-      <th th:text="#{label.vehicle.model}">Model</th>
-      <th th:text="#{label.vehicle.modelYear}">Year</th>
-      <th th:text="#{label.vehicle.color}">Color</th>
-      <th th:text="#{label.vehicle.mileage}">Mileage</th>
-      <th th:text="#{status}">Status</th>
-      <th>Actions</th>
+      <th>VIN</th>
+      <th>Make</th>
+      <th>Model</th>
+      <th>Year</th>
+      <th>Color</th>
+      <th>Mileage</th>
+      <th>Status</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="vehicle : ${customer.vehicles}">
-      <td>
-        <code th:text="${vehicle.vin}">1HGBH41JXMN109186</code>
-      </td>
+      <td><code th:text="${vehicle.vin}">1HGBH41JXMN109186</code></td>
       <td th:text="${vehicle.make}">Honda</td>
       <td th:text="${vehicle.model}">Accord</td>
       <td th:text="${vehicle.modelYear}">2020</td>
+      <td th:text="${vehicle.color != null ? vehicle.color : '-'}">Silver</td>
+      <td th:text="${vehicle.currentMileage}">45000</td>
       <td>
-        <span th:if="${vehicle.color}" th:text="${vehicle.color}">Silver</span>
-        <span th:unless="${vehicle.color}" class="text-muted">-</span>
-      </td>
-      <td th:text="${#numbers.formatInteger(vehicle.currentMileage, 0, 'COMMA')} + ' mi'">45,000 mi</td>
-      <td>
-                <span class="badge"
-                      th:classappend="${vehicle.status == 'ACTIVE'} ? 'badge-success' :
-                                      ${vehicle.status == 'IN_SERVICE'} ? 'badge-info' : 'badge-secondary'"
-                      th:text="${vehicle.status}">
-                    ACTIVE
-                </span>
-      </td>
-      <td>
-        <a class="btn btn-sm btn-info" th:href="@{/vehicles/{vin}(vin=${vehicle.vin})}">
-          <span class="fa fa-eye"></span> View
-        </a>
+        <span class="badge badge-success" th:text="${vehicle.status}">ACTIVE</span>
       </td>
     </tr>
     </tbody>
   </table>
 </div>
 
-<div th:if="${customer.vehicles.empty}" class="alert alert-info">
+<div th:if="${customer.vehicles == null or customer.vehicles.empty}" class="alert alert-info">
   <span class="fa fa-info-circle"></span>
-  <span th:text="#{noCustomersFound}">No vehicles found for this customer.</span>
+  No vehicles found for this customer.
 </div>
 
 <a class="btn btn-success" th:href="@{/vehicles/new(customerId=${customer.customerId})}">
-  <span class="fa fa-plus"></span> <span th:text="#{addVehicle}">Add Vehicle</span>
+  <span class="fa fa-plus"></span> Add Vehicle
 </a>
 
-<br/><br/>
-
-<!-- Service History Preview (Optional) -->
-<h3>
-  <span class="fa fa-wrench"></span> Recent Service History
-</h3>
-
-<div class="alert alert-secondary">
-  <span class="fa fa-info-circle"></
+</body>
+</html>
