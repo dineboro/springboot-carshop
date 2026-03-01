@@ -1,10 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'customers')}">
+
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title th:text="#{customers}">Customers</title>
 </head>
+
 <body>
+
+<h2 th:text="#{customers}">Customers</h2>
+
+<table id="customersTable" class="table table-striped">
+  <thead>
+  <tr>
+    <th style="width: 150px;">
+      <span th:text="#{label.customer.name}">Customer Name</span>
+    </th>
+    <th style="width: 120px;">
+      <span th:text="#{label.customer.phone}">Phone</span>
+    </th>
+    <th style="width: 200px;">
+      <span th:text="#{label.customer.email}">Email</span>
+    </th>
+    <th style="width: 100px;">
+      <span th:text="#{status}">Status</span>
+    </th>
+    <th style="width: 80px;">
+      <span th:text="#{vehicles}">Vehicles</span>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="customer : ${listCustomers}">
+    <td>
+      <a th:href="@{/customers/{id}(id=${customer.customerId})}"
+         th:text="${customer.customerName}"/>
+    </td>
+    <td th:text="${customer.phone}"/>
+    <td th:text="${customer.email ?: 'N/A'}"/>
+    <td>
+            <span class="badge"
+                  th:classappend="${customer.status == 'ACTIVE'} ? 'badge-success' :
+                                  ${customer.status == 'INACTIVE'} ? 'badge-secondary' : 'badge-warning'"
+                  th:text="${customer.status}">
+            </span>
+    </td>
+    <td th:text="${#lists.size(customer.vehicles)}"/>
+  </tr>
+  </tbody>
+</table>
+
+<!-- Pagination controls -->
+<div class="row" th:if="${totalPages > 1}">
+  <div class="col-sm-12">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <!-- First page link -->
+        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+          <a class="page-link" th:href="@{/customers(page=1)}" th:text="#{first}">First</a>
+        </li>
+
+        <!-- Previous page link -->
+        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+          <a class="page-link" th:href="@{/customers(page=${currentPage - 1})}" th:text="#{previous}">Previous</a>
+        </li>
+
+        <!-- Page numbers (show current page +/- 2) -->
+        <li class="page-item"
+            th:each="pageNum : ${#numbers.sequence(
+                        T(java.lang.Math).max(1, currentPage - 2),
+                        T(java.lang.Math).min(totalPages, currentPage + 2))}"
+            th:classappend="${pageNum == currentPage} ? 'active'">
+          <a class="page-link" th:href="@{/customers(page=${pageNum})}" th:text="${pageNum}">1</a>
+        </li>
+
+        <!-- Next page link -->
+        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+          <a class="page-link" th:href="@{/customers(page=${currentPage + 1})}" th:text="#{next}">Next</a>
+        </li>
+
+        <!-- Last page link -->
+        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+          <a class="page-link" th:href="@{/customers(page=${totalPages})}" th:text="#{last}">Last</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- Pagination info -->
+<div class="row">
+  <div class="col-sm-12 text-center">
+    <p class="text-muted">
+      <span th:text="#{pages}">Pages</span>:
+      <strong th:text="${currentPage}">1</strong> /
+      <strong th:text="${totalPages}">10</strong>
+      (Total: <span th:text="${totalItems}">50</span> customers)
+    </p>
+  </div>
+</div>
+
+<!-- Action buttons -->
+<div class="row">
+  <div class="col-sm-12">
+    <a class="btn btn-primary" th:href="@{/customers/new}">
+      <span class="fa fa-plus"></span> <span th:text="#{addCustomer}">Add Customer</span>
+    </a>
+    <a class="btn btn-secondary" th:href="@{/customers/find}">
+      <span class="fa fa-search"></span> <span th:text="#{findCustomers}">Search Customers</span>
+    </a>
+  </div>
+</div>
 
 </body>
 </html>

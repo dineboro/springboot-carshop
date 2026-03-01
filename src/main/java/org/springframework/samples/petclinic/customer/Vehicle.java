@@ -13,50 +13,50 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Vehicle")
+@Table(name = "vehicle")
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE Vehicle SET deleted_at = NOW() WHERE VIN = ?")
+@SQLDelete(sql = "UPDATE vehicle SET deleted_at = NOW() WHERE vin = ?")
 @SQLRestriction("deleted_at IS NULL")
 public class Vehicle {
 
 	@Id
-	@Column(name = "VIN", length = 17)
+	@Column(name = "vin", length = 17)
 	@NotEmpty(message = "{NotEmpty.vehicle.vin}")
 	@Size(min = 17, max = 17, message = "{Size.vehicle.vin}")
 	private String vin;
 
 	@ManyToOne
-	@JoinColumn(name = "Customer_ID")
+	@JoinColumn(name = "customer_id")
 	private Customer customer;
 
-	@Column(name = "Make")
+	@Column(name = "make")
 	@NotEmpty(message = "{NotEmpty.vehicle.make}")
 	private String make;
 
-	@Column(name = "Model")
+	@Column(name = "model")
 	@NotEmpty(message = "{NotEmpty.vehicle.model}")
 	private String model;
 
-	@Column(name = "ModelYear")
+	@Column(name = "model_year")
 	@Min(value = 1900, message = "{Min.vehicle.modelYear}")
 	@Max(value = 2026, message = "{Max.vehicle.modelYear}")
 	private Integer modelYear;
 
-	@Column(name = "Color")
+	@Column(name = "color")
 	private String color;
 
-	@Column(name = "LicensePlate")
+	@Column(name = "license_plate")
 	private String licensePlate;
 
-	@Column(name = "CurrentMileage")
+	@Column(name = "current_mileage")
 	private Integer currentMileage;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "Status")
+	@Column(name = "status")
 	private VehicleStatus status = VehicleStatus.ACTIVE;
 
-	@Column(name = "CreatedDate", insertable = false, updatable = false)
+	@Column(name = "created_date", insertable = false, updatable = false)
 	private LocalDateTime createdDate;
 
 	@Column(name = "deleted_at")

@@ -13,41 +13,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "Customer")
+@Table(name = "customer")
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE Customer SET deleted_at = NOW() WHERE Customer_ID = ?")
+// Intercept the delete command and turn it into an update
+@SQLDelete(sql = "UPDATE customer SET deleted_at = NOW() WHERE customer_id = ?")
+// Automatically filter out deleted rows when reading data
 @SQLRestriction("deleted_at IS NULL")
 public class Customer {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "Customer_ID")
+	@Column(name = "customer_id")
 	private Integer customerId;
 
 	@Column(name = "user_id")
-	private Integer userId;
+	private Integer userId;  // Links to users table when customer registers for portal
 
-	@Column(name = "CustomerName")
+	@Column(name = "customer_name")
 	@NotEmpty(message = "{NotEmpty.customer.name}")
 	private String customerName;
 
-	@Column(name = "Phone")
+	@Column(name = "phone")
 	@NotEmpty(message = "{NotEmpty.customer.phone}")
 	@Pattern(regexp = "^\\d{10}$", message = "{telephone.invalid}")
 	private String phone;
 
-	@Column(name = "Email")
+	@Column(name = "email")
 	private String email;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "Status")
+	@Column(name = "status")
 	private CustomerStatus status = CustomerStatus.ACTIVE;
 
-	@Column(name = "CreatedDate", insertable = false, updatable = false)
+	@Column(name = "created_date", insertable = false, updatable = false)
 	private LocalDateTime createdDate;
 
-	@Column(name = "UpdatedDate", insertable = false, updatable = false)
+	@Column(name = "updated_date", insertable = false, updatable = false)
 	private LocalDateTime updatedDate;
 
 	@Column(name = "deleted_at")

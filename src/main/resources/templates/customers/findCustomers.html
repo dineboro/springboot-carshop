@@ -1,10 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'customers')}">
+
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title th:text="#{findCustomers}">Find Customers</title>
 </head>
+
 <body>
+
+<h2>
+  <span class="fa fa-search"></span>
+  <span th:text="#{findCustomers}">Find Customers</span>
+</h2>
+
+<form th:action="@{/customers/search}" method="get" class="form-horizontal">
+
+  <!-- Search by Name -->
+  <div class="form-group">
+    <label class="col-sm-2 control-label" th:text="#{label.customer.name}">Customer Name</label>
+    <div class="col-sm-10">
+      <input class="form-control"
+             name="customerName"
+             size="30"
+             maxlength="256"
+             th:placeholder="#{searchCustomer}"
+             autofocus/>
+      <small class="form-text text-muted">Search by customer name (partial match allowed)</small>
+    </div>
+  </div>
+
+  <!-- Search by Phone (Optional - uncomment if needed) -->
+  <!--
+  <div class="form-group">
+      <label class="col-sm-2 control-label" th:text="#{label.customer.phone}">Phone</label>
+      <div class="col-sm-10">
+          <input class="form-control"
+                 name="phone"
+                 type="tel"
+                 size="20"
+                 maxlength="20"
+                 th:placeholder="'5551234567'"/>
+          <small class="form-text text-muted">Search by phone number</small>
+      </div>
+  </div>
+  -->
+
+  <!-- Search by Email (Optional - uncomment if needed) -->
+  <!--
+  <div class="form-group">
+      <label class="col-sm-2 control-label" th:text="#{label.customer.email}">Email</label>
+      <div class="col-sm-10">
+          <input class="form-control"
+                 name="email"
+                 type="email"
+                 size="30"
+                 maxlength="256"
+                 th:placeholder="'customer@example.com'"/>
+          <small class="form-text text-muted">Search by email address</small>
+      </div>
+  </div>
+  -->
+
+  <!-- Buttons -->
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-primary">
+        <span class="fa fa-search"></span>
+        <span th:text="#{button.search}">Search</span>
+      </button>
+      <a class="btn btn-secondary" th:href="@{/customers}">
+        <span class="fa fa-list"></span>
+        View All Customers
+      </a>
+    </div>
+  </div>
+</form>
+
+<!-- No results message -->
+<div class="alert alert-warning" th:if="${notFound}">
+  <span class="fa fa-exclamation-triangle"></span>
+  <strong>No Results Found</strong>
+  <p th:if="${customerName}">
+    No customers found matching: <strong th:text="${customerName}">search term</strong>
+  </p>
+  <p th:unless="${customerName}">
+    Please enter a search term and try again.
+  </p>
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top: 30px;">
+  <div class="card-body">
+    <h5 class="card-title">
+      <span class="fa fa-lightbulb-o"></span> Quick Actions
+    </h5>
+    <div class="btn-group" role="group">
+      <a class="btn btn-success" th:href="@{/customers/new}">
+        <span class="fa fa-plus"></span>
+        <span th:text="#{addCustomer}">Add New Customer</span>
+      </a>
+      <a class="btn btn-info" th:href="@{/customers}">
+        <span class="fa fa-list"></span>
+        View All Customers
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Search Tips -->
+<div class="alert alert-info" style="margin-top: 20px;">
+  <strong><span class="fa fa-info-circle"></span> Search Tips:</strong>
+  <ul>
+    <li>You can search by partial name (e.g., "John" will find "John Smith", "Johnny Doe", etc.)</li>
+    <li>Search is case-insensitive</li>
+    <li>Leave blank and click Search to view all customers</li>
+  </ul>
+</div>
 
 </body>
 </html>
