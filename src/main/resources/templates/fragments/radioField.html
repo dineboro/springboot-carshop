@@ -1,0 +1,24 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<th:block th:fragment="radio (label, name, options)">
+  <div class="mb-3" th:with="valid=${!#fields.hasErrors(name)}">
+    <label class="form-label d-block" th:text="${label}">Label</label>
+
+    <div class="form-check form-check-inline" th:each="opt : ${options}">
+      <input type="radio"
+             class="form-check-input"
+             th:classappend="${valid ? '' : 'is-invalid'}"
+             th:field="*{__${name}__}"
+             th:value="${opt.key}"
+             th:id="${name + '_' + opt.key}" />
+
+      <label class="form-check-label"
+             th:for="${name + '_' + opt.key}"
+             th:text="${opt.value}">Option</label>
+    </div>
+
+    <div class="invalid-feedback d-block" th:if="${!valid}" th:errors="*{__${name}__}">Error message</div>
+  </div>
+</th:block>
+</body>
+</html>

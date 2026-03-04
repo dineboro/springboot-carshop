@@ -1,0 +1,59 @@
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'register')}">
+
+<body>
+
+<h2 class="text-center">Register as Manager</h2>
+
+<div class="container mt-4" style="max-width: 500px;">
+
+  <p class="text-muted text-center">Register for a manager account (requires admin approval)</p>
+
+  <form th:object="${user}" class="form-horizontal" method="post">
+
+    <!-- First Name -->
+    <input th:replace="~{fragments/inputField :: input ('First Name', 'firstName', 'text')}" />
+
+    <!-- Last Name -->
+    <input th:replace="~{fragments/inputField :: input ('Last Name', 'lastName', 'text')}" />
+
+    <!-- Email -->
+    <input th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}" />
+
+    <!-- Phone (Optional) -->
+    <div class="mb-3">
+      <label for="phone" class="form-label">Phone (Optional)</label>
+      <div class="position-relative">
+        <input type="tel"
+               id="phone"
+               th:field="*{phone}"
+               class="form-control"
+               placeholder="Enter your phone number">
+      </div>
+    </div>
+
+    <!-- Password -->
+    <input th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}" />
+
+    <small class="form-text text-muted">
+      Password must be at least 8 characters with uppercase, lowercase, and a number
+    </small>
+
+    <!-- Submit Button -->
+    <div class="d-grid gap-2 mt-4">
+      <button class="btn btn-primary" type="submit">
+        <span class="fa fa-user-plus"></span> Register
+      </button>
+    </div>
+
+    <!-- Login Link -->
+    <div class="text-center mt-3">
+      <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
+    </div>
+
+  </form>
+
+</div>
+
+</body>
+</html>

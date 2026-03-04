@@ -126,3 +126,15 @@ CREATE TABLE IF NOT EXISTS locations (
   CONSTRAINT fk_locations_school FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
   CONSTRAINT fk_locations_parent FOREIGN KEY (parent_location_id) REFERENCES locations(id) ON DELETE SET NULL
   );
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+                                           id INT AUTO_INCREMENT PRIMARY KEY,
+                                           name VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  monthly_price INT NOT NULL,
+  annual_price INT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME,
+  UNIQUE KEY uk_subscription_name (name)
+  );

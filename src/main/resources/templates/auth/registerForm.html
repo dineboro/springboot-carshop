@@ -3,31 +3,33 @@
 
 <body>
 
-<h2>Register New Student</h2>
+<h2 class="text-center">Register New Student</h2>
 
-<form th:object="${user}" class="form-horizontal" method="post">
+<div class="container mt-4" style="max-width: 500px;">
 
-<!--  <input th:replace="~{fragments/inputField :: input ('firstName', 'First Name', 'text')}" />-->
-<!--  <input th:replace="~{fragments/inputField :: input ('lastName', 'Last Name', 'text')}" />-->
-  <input th:replace="~{fragments/inputField :: input ('Email','email',  'text')}" />
-  <input th:replace="~{fragments/inputField :: input ('Password','password', 'password')}" />
+  <form th:object="${user}" class="form-horizontal" method="post">
 
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <button class="btn btn-primary" type="submit" th:text="#{button.register}">Register</button>
+    <input th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}" />
+    <input th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}" />
+
+    <div class="form-group">
+      <div class="d-grid gap-2 mt-4">
+        <button class="btn btn-primary" type="submit">Register</button>
+      </div>
     </div>
-  </div>
 
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <p>
-        <span th:text="#{text.auth.existing}">Already have an account?</span>
-        <a th:href="@{/login}" th:text="#{link.auth.login}">Login here</a>
-      </p>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <p>
+          <span>Already have an account?</span>
+          <a th:href="@{/login}">Login here</a>
+        </p>
+      </div>
     </div>
-  </div>
 
-</form>
+  </form>
+
+</div>
 
 </body>
 </html>

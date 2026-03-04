@@ -3,21 +3,21 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Customers</title>
+  <title th:text="#{customers}">Customers</title>
 </head>
 
 <body>
 
-<h2>Customers</h2>
+<h2 th:text="#{customers}">Customers</h2>
 
 <table id="customersTable" class="table table-striped">
   <thead>
   <tr>
-    <th style="width: 150px;">Customer Name</th>
-    <th style="width: 120px;">Phone</th>
-    <th style="width: 200px;">Email</th>
-    <th style="width: 100px;">Status</th>
-    <th style="width: 80px;">Vehicles</th>
+    <th style="width: 150px;" th:text="#{label.customer.name}">Customer Name</th>
+    <th style="width: 120px;" th:text="#{label.customer.phone}">Phone</th>
+    <th style="width: 200px;" th:text="#{label.customer.email}">Email</th>
+    <th style="width: 100px;" th:text="#{status}">Status</th>
+    <th style="width: 80px;" th:text="#{vehicles}">Vehicles</th>
   </tr>
   </thead>
   <tbody>
@@ -43,12 +43,12 @@
       <ul class="pagination justify-content-center">
         <!-- First page -->
         <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-          <a class="page-link" th:href="@{/customers(page=1)}">First</a>
+          <a class="page-link" th:href="@{/customers(page=1)}" th:text="#{first}">First</a>
         </li>
 
         <!-- Previous page -->
         <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-          <a class="page-link" th:href="@{/customers(page=${currentPage - 1})}">Previous</a>
+          <a class="page-link" th:href="@{/customers(page=${currentPage - 1})}" th:text="#{previous}">Previous</a>
         </li>
 
         <!-- Current page indicator -->
@@ -58,12 +58,12 @@
 
         <!-- Next page -->
         <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-          <a class="page-link" th:href="@{/customers(page=${currentPage + 1})}">Next</a>
+          <a class="page-link" th:href="@{/customers(page=${currentPage + 1})}" th:text="#{next}">Next</a>
         </li>
 
         <!-- Last page -->
         <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-          <a class="page-link" th:href="@{/customers(page=${totalPages})}">Last</a>
+          <a class="page-link" th:href="@{/customers(page=${totalPages})}" th:text="#{last}">Last</a>
         </li>
       </ul>
     </nav>
@@ -74,8 +74,8 @@
 <div class="row">
   <div class="col-sm-12 text-center">
     <p class="text-muted">
-      Page <strong th:text="${currentPage}">1</strong> of <strong th:text="${totalPages}">10</strong>
-      (Total: <span th:text="${totalItems}">50</span> customers)
+      <span th:text="#{pages}">Page</span>: <strong th:text="${currentPage}">1</strong> / <strong th:text="${totalPages}">10</strong>
+      (<span th:text="#{total}">Total</span>: <span th:text="${totalItems}">50</span> <span th:text="#{customers}">customers</span>)
     </p>
   </div>
 </div>
@@ -84,10 +84,10 @@
 <div class="row">
   <div class="col-sm-12">
     <a class="btn btn-primary" th:href="@{/customers/new}">
-      <span class="fa fa-plus"></span> Add Customer
+      <span class="fa fa-plus"></span> <span th:text="#{addCustomer}">Add Customer</span>
     </a>
     <a class="btn btn-secondary" th:href="@{/customers/find}">
-      <span class="fa fa-search"></span> Search Customers
+      <span class="fa fa-search"></span> <span th:text="#{findCustomers}">Search Customers</span>
     </a>
   </div>
 </div>

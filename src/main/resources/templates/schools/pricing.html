@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'pricing')}">
+<!--<a th:href="@{/subscriptions/new}" class="btn btn-primary" style="margin-bottom: 15px;">-->
+
+
+<body>
+
+
+<div class="container mt-4">
+
+
+  <div class="mb-4 pb-2 border-bottom">
+    <h1>Pricing</h1>
+    <p class="fs-5 text-body-secondary">If you are in charge of organizing intramural activities at your school, choose a subscription plan below!</p>
+  </div>
+
+  <a th:href="@{/subscriptions/new}" class="btn btn-primary" style="margin-bottom: 15px;">
+    <span class="fa fa-plus"></span>
+    <span>Add Subscription</span>
+  </a>
+
+
+
+
+  <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+
+
+    <div class="col" th:each="subscription : ${subscriptions}">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3">
+          <h4 class="my-0 fw-normal" th:text="${subscription.name}">Pro</h4>
+        </div>
+        <div class="card-body">
+          <h1 class="card-title pricing-card-title">$<span th:text="${subscription.monthlyPrice}">15</span>
+            <small class="text-body-secondary fw-light">/mo</small></h1>
+          <p th:text="${subscription.description}">Subscription description goes here</p>
+          <button type="button" class="w-100 btn btn-lg btn-primary">Get started</button>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+
+</body>
+</html>

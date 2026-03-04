@@ -1,0 +1,18 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<th:block th:fragment="checkbox (label, name)">
+  <div class="mb-3 form-check" th:with="valid=${!#fields.hasErrors(name)}">
+
+    <input type="checkbox"
+           class="form-check-input"
+           th:classappend="${valid ? '' : 'is-invalid'}"
+           th:field="*{__${name}__}"
+           th:id="${name}" />
+
+    <label class="form-check-label" th:for="${name}" th:text="${label}">Label</label>
+
+    <div class="invalid-feedback" th:if="${!valid}" th:errors="*{__${name}__}">Error message</div>
+  </div>
+</th:block>
+</body>
+</html>

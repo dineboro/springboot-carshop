@@ -31,7 +31,7 @@ import jakarta.validation.constraints.NotBlank;
 public class NamedEntity extends BaseEntity {
 
 	@Column
-	@NotBlank
+	@NotBlank(message = "Name is required.")
 	private String name;
 
 	public String getName() {

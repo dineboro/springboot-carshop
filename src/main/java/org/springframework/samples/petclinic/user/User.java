@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.samples.petclinic.model.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -33,13 +34,40 @@ public class User extends BaseEntity {
 	@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$", message = "Password must contain uppercase, lowercase, and number")
 	private String password;
 
+	@Column(name="phone", length = 20)
+	private String phone;
+
+	// NEW: Approval fields for manager registration
+	@Column(name="is_active")
+	private Boolean isActive = true;
+
+	@Column(name="is_approved")
+	private Boolean isApproved = false;  // Default FALSE - requires admin approval
+
+	@Column(name="created_at")
+	private LocalDateTime createdAt;
+
+	@Column(name="updated_at")
+	private LocalDateTime updatedAt;
+
 	// Many-to-Many Relationship with Role
-	@ManyToMany(fetch = FetchType.EAGER) // Fetch roles immediately when a user is loaded
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(
-		name = "user_roles", // Name of the junction table in MySQL
-		joinColumns = @JoinColumn(name = "user_id"), // Column in user_roles that references the 'users' table
-		inverseJoinColumns = @JoinColumn(name = "role_id") // Column in user_roles that references the 'roles' table
+		name = "user_roles",
+		joinColumns = @JoinColumn(name = "user_id"),
+		inverseJoinColumns = @JoinColumn(name = "role_id")
 	)
 	@EqualsAndHashCode.Exclude
 	private Set<Role> roles;
+
+	@PrePersist
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
 }

@@ -29,15 +29,36 @@ public class SecurityConfig {
 		http
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorize -> authorize
+				// Allow all GET requests (for viewing pages)
 				.requestMatchers(HttpMethod.GET).permitAll()
 
-				// ⬇️ ADD "/register" HERE
-				.requestMatchers("/register-student", "/register", "/login", "/schools/new", "/owners/new").permitAll()
+				// Allow POST for registration, login, and creating new subscriptions
+				.requestMatchers("/register-student", "/register", "/login", "/schools/new", "/owners/new", "/subscriptions/new").permitAll()
 
+				// Protect all other requests
 				.anyRequest().authenticated()
 			)
 			.httpBasic(AbstractHttpConfigurer::disable)
-			.formLogin(AbstractHttpConfigurer::disable);
+			.formLogin(form -> form
+				.loginPage("/login")
+				.usernameParameter("email")
+				.defaultSuccessUrl("/login-success", true)
+				.failureHandler((request, response, exception) -> {
+					// Check if it's a disabled account
+					if (exception instanceof org.springframework.security.authentication.DisabledException) {
+						response.sendRedirect("/login?disabled");
+					} else {
+						request.getSession().setAttribute("LAST_EMAIL", request.getParameter("email"));
+						response.sendRedirect("/login?error");
+					}
+				})
+				.permitAll()
+			)
+			.logout(logout -> logout
+				.logoutUrl("/logout")
+				.logoutSuccessUrl("/login?logout")
+				.permitAll()
+			);
 
 		return http.build();
 	}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'login')}">
+<body>
+
+<h2 class="text-center">Please Log In</h2>
+
+<div class="container mt-4" style="max-width: 500px;">
+
+  <div th:if="${param.error}" class="alert alert-danger">
+    Invalid email or password.
+  </div>
+  <div th:if="${param.logout}" class="alert alert-success">
+    You have been logged out successfully.
+  </div>
+
+  <form th:action="@{/login}" th:object="${user}" method="post" class="form-horizontal">
+
+    <div th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}"></div>
+    <div th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}"></div>
+
+    <div class="d-grid gap-2 mt-4">
+      <button type="submit" class="btn btn-primary">Log In</button>
+    </div>
+
+    <div class="text-center mt-3">
+      <p>Don't have an account? <a th:href="@{/register-student}">Register here</a></p>
+    </div>
+
+  </form>
+</div>
+
+</body>
+</html>

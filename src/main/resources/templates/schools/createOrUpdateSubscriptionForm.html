@@ -1,0 +1,33 @@
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'pricing')}">
+
+
+<body>
+
+
+<h2>Add Subscription</h2>
+
+
+<form th:object="${subscription}" th:action="@{/subscriptions/new}" class="form-horizontal" id="add-school-form" method="post">
+
+  <input th:replace="~{fragments/inputField :: input ('Name', 'name', 'text')}" />
+
+  <input th:replace="~{fragments/inputField :: input ('Description', 'description', 'text')}" />
+
+  <input th:replace="~{fragments/inputField :: input ('Monthly Price', 'monthlyPrice', 'text')}" />
+
+  <input th:replace="~{fragments/inputField :: input ('Annual Price', 'annualPrice', 'text')}" />
+
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button class="btn btn-primary" type="submit">Add Subscription</button>
+    </div>
+  </div>
+
+</form>
+
+
+</body>
+</html>
+
+

@@ -137,3 +137,9 @@ INSERT IGNORE INTO locations (school_id, parent_location_id, name, description, 
 INSERT IGNORE INTO locations (school_id, parent_location_id, name, description, status_id) VALUES
 (1, 3, 'Basketball Court 1', 'North court', 'active'),
 (1, 3, 'Basketball Court 2', 'South court', 'active');
+
+INSERT IGNORE INTO subscriptions (name, description, monthly_price, annual_price) VALUES
+('Free', 'Get started with 10 free leagues for your college or university.', 0, 0),
+('Pro', 'Create up to 25 leagues for your college or university.', 25, 250);
+
+
