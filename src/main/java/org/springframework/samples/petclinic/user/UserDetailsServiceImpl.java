@@ -21,20 +21,23 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			.orElseThrow(() -> new UsernameNotFoundException("No user found with email: " + email));
 
 		// 2. Check if user is approved (for managers/staff)
-		if (user.getIsApproved() != null && !user.getIsApproved()) {
+		//  FIXED: Use Boolean.TRUE.equals() to safely handle null
+		if (!Boolean.TRUE.equals(user.getIsApproved())) {
 			throw new DisabledException("Your account is pending approval. Please contact an administrator.");
 		}
 
 		// 3. Check if user is active
-		if (user.getIsActive() != null && !user.getIsActive()) {
+		// FIXED: Use Boolean.TRUE.equals() to safely handle null
+		if (!Boolean.TRUE.equals(user.getIsActive())) {
 			throw new DisabledException("Your account has been deactivated.");
 		}
 
 		// 4. Convert your custom User model into the UserDetails object that Spring Security understands
+		// FIXED: Use Boolean.TRUE.equals() to avoid NullPointerException
 		return org.springframework.security.core.userdetails.User.builder()
 			.username(user.getEmail())
 			.password(user.getPassword()) // Spring Security will compare this HASH with the login password
-			.disabled(!user.getIsActive() || !user.getIsApproved())
+			.disabled(!Boolean.TRUE.equals(user.getIsActive()) || !Boolean.TRUE.equals(user.getIsApproved()))
 			.roles(user.getRoles().stream()
 				.map(role -> role.getName())
 				.toArray(String[]::new)) // Converts your Role set into Spring's required format

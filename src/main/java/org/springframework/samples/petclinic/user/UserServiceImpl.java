@@ -24,14 +24,14 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public User registerNewStudent(User user) {
-		// Hash the user's password
+		// Hash password
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 
 		// Students are auto-approved
 		user.setIsActive(true);
 		user.setIsApproved(true);
 
-		// Default the user's default role
+		// Assign STUDENT role
 		Role studentRole = roleRepository.findByName("STUDENT")
 			.orElseThrow(() -> new RuntimeException("Student Role Not Found"));
 
@@ -39,43 +39,39 @@ public class UserServiceImpl implements UserService {
 		roles.add(studentRole);
 		user.setRoles(roles);
 
-		// Save the user's data
 		return userRepository.save(user);
 	}
 
 	/**
-	 * Register manager - requires admin approval
+	 * NEW: Register any user (Manager, Receptionist, Technician)
+	 * - No role assigned (admin will assign later)
+	 * - Requires admin approval
 	 */
 	@Override
-	public User registerNewManager(User user) {
+	public User registerNewUser(User user) {
 		// Hash password
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-		// Set as NOT approved (admin must approve)
+		// Set as NOT approved (admin must approve AND assign role)
 		user.setIsActive(true);
-		user.setIsApproved(false);  // ← KEY: Requires approval
+		user.setIsApproved(false);  // ← Requires approval
 
-		// Assign MANAGER role
-		Role managerRole = roleRepository.findByName("MANAGER")
-			.orElseThrow(() -> new RuntimeException("MANAGER role not found"));
-
-		Set<Role> roles = new HashSet<>();
-		roles.add(managerRole);
-		user.setRoles(roles);
+		// NO ROLE ASSIGNED - admin will assign role when approving
+		user.setRoles(new HashSet<>());
 
 		// Save user
 		return userRepository.save(user);
 	}
 
 	/**
-	 * Register customer (for portal access)
+	 * Register customer (for portal access via invitation)
 	 */
 	@Override
 	public User registerNewCustomer(User user) {
 		// Hash password
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-		// Customers are auto-approved
+		// Customers are auto-approved when invited
 		user.setIsActive(true);
 		user.setIsApproved(true);
 
@@ -87,32 +83,28 @@ public class UserServiceImpl implements UserService {
 		roles.add(customerRole);
 		user.setRoles(roles);
 
-		// Save user
 		return userRepository.save(user);
 	}
 
 	/**
-	 * Create employee (by manager or admin)
-	 * Employees = RECEPTIONIST or TECHNICIAN
+	 * NEW: Admin assigns role to user after approval
 	 */
 	@Override
-	public User createEmployee(User user, String roleName, Integer createdBy) {
-		// Hash password
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
+	public void assignRole(Integer userId, String roleName) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new RuntimeException("User not found"));
 
-		// Employees are auto-approved when created by manager
-		user.setIsActive(true);
-		user.setIsApproved(true);
-
-		// Assign role (RECEPTIONIST or TECHNICIAN)
 		Role role = roleRepository.findByName(roleName)
 			.orElseThrow(() -> new RuntimeException(roleName + " role not found"));
 
-		Set<Role> roles = new HashSet<>();
+		// Add role to user's roles
+		Set<Role> roles = user.getRoles();
+		if (roles == null) {
+			roles = new HashSet<>();
+		}
 		roles.add(role);
 		user.setRoles(roles);
 
-		// Save user
-		return userRepository.save(user);
+		userRepository.save(user);
 	}
 }

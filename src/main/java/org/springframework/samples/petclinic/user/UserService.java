@@ -1,8 +1,8 @@
 package org.springframework.samples.petclinic.user;
 
 public interface UserService {
-	User registerNewStudent(User user);
-	User registerNewManager(User user);  // NEW
-	User registerNewCustomer(User user);
-	User createEmployee(User user, String roleName, Integer createdBy); // NEW
+	User registerNewStudent(User user);  // Keep for instructor's demo
+	User registerNewUser(User user);     // NEW: General registration (no role, needs approval)
+	User registerNewCustomer(User user); // For customer portal
+	void assignRole(Integer userId, String roleName); // NEW: Admin assigns role
 }

@@ -22,46 +22,21 @@
 
   <div th:if="${messageSuccess}" class="alert alert-success" th:text="${messageSuccess}"></div>
 
-  <!-- Login Form - Spring Security uses 'username' and 'password' as field names -->
-  <form th:action="@{/login}" method="post" class="form-horizontal">
+  <!-- Login Form - Instructor's version with ${user} model -->
+  <form th:action="@{/login}" th:object="${user}" method="post" class="form-horizontal">
 
-    <!-- Email Field -->
-    <div class="mb-3">
-      <label for="username" class="form-label">Email</label>
-      <div class="position-relative">
-        <input type="email"
-               id="username"
-               name="username"
-               class="form-control"
-               placeholder="Enter your email"
-               required
-               autofocus>
-      </div>
-    </div>
+    <div th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}"></div>
+    <div th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}"></div>
 
-    <!-- Password Field -->
-    <div class="mb-3">
-      <label for="password" class="form-label">Password</label>
-      <div class="position-relative">
-        <input type="password"
-               id="password"
-               name="password"
-               class="form-control"
-               placeholder="Enter your password"
-               required>
-      </div>
-    </div>
-
-    <!-- Submit Button -->
     <div class="d-grid gap-2 mt-4">
       <button type="submit" class="btn btn-primary">
         <span class="fa fa-sign-in"></span> Log In
       </button>
     </div>
 
-    <!-- Register Link -->
+    <!-- Single Register Link -->
     <div class="text-center mt-3">
-      <p>Don't have an account? <a th:href="@{/register}">Register as Manager</a></p>
+      <p>Don't have an account? <a th:href="@{/register-student}">Register here</a></p>
     </div>
 
   </form>

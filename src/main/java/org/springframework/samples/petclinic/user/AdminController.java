@@ -12,9 +12,11 @@ import java.util.List;
 public class AdminController {
 
 	private final UserRepository userRepository;
+	private final UserService userService;
 
-	public AdminController(UserRepository userRepository) {
+	public AdminController(UserRepository userRepository, UserService userService) {
 		this.userRepository = userRepository;
+		this.userService = userService;
 	}
 
 	/**
@@ -29,20 +31,59 @@ public class AdminController {
 	}
 
 	/**
-	 * Approve user
+	 * Show approval form with role selection
 	 */
-	@PostMapping("/approve/{id}")
-	public String approveUser(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+	@GetMapping("/approve-form/{id}")
+	public String showApprovalForm(@PathVariable Integer id, Model model) {
 		User user = userRepository.findById(id)
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
+		model.addAttribute("user", user);
+		return "admin/approveUserForm";
+	}
+
+	/**
+	 * Approve user AND assign role
+	 */
+	@PostMapping("/approve/{id}")
+	public String approveUserWithRole(@PathVariable Integer id,
+									  @RequestParam String roleName,
+									  RedirectAttributes redirectAttributes) {
+		User user = userRepository.findById(id)
+			.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// Approve user
 		user.setIsApproved(true);
 		userRepository.save(user);
 
-		// TODO: Send approval email to user
+		// Assign role
+		userService.assignRole(id, roleName);
 
 		redirectAttributes.addFlashAttribute("messageSuccess",
-			"User " + user.getEmail() + " has been approved");
+			"User " + user.getEmail() + " has been approved as " + roleName);
+		return "redirect:/admin/pending-approvals";
+	}
+
+	/**
+	 * Quick approve with default role selection (alternative method)
+	 */
+	@PostMapping("/quick-approve/{id}")
+	public String quickApproveUser(@PathVariable Integer id,
+								   @RequestParam String role,
+								   RedirectAttributes redirectAttributes) {
+		User user = userRepository.findById(id)
+			.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// Approve user
+		user.setIsApproved(true);
+		userRepository.save(user);
+
+		// Assign selected role
+		userService.assignRole(id, role);
+
+		redirectAttributes.addFlashAttribute("messageSuccess",
+			"User " + user.getEmail() + " approved as " + role);
+
 		return "redirect:/admin/pending-approvals";
 	}
 

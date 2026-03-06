@@ -55,6 +55,15 @@
           <span class="fa fa-users" aria-hidden="true"></span>
           <span th:text="#{findCustomers}">Find customers</span>
         </li>
+        <!-- ADMIN ONLY - Pending Approvals -->
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+          <a th:class="${menu == 'admin' ? 'nav-link active' : 'nav-link'}"
+             th:href="@{/admin/pending-approvals}"
+             title="Pending Approvals">
+            <span class="fa fa-user-plus" aria-hidden="true"></span>
+            <span>Pending Approvals</span>
+          </a>
+        </li>
         <li th:replace="~{::menuItem ('/pricing','pricing','Subscription pricing','trophy',#{pricingPage})}">
 <!--          <a th:href="@{/subscriptions/new}" class="btn btn-primary" style="margin-bottom: 15px;">-->
           <span class="fa fa-trophy" aria-hidden="true"></span>

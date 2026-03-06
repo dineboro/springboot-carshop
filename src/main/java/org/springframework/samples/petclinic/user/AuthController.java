@@ -33,7 +33,7 @@ public class AuthController {
 	}
 
 	// ========================================
-	// STUDENT REGISTRATION (Keep for instructor's demo)
+	// STUDENT REGISTRATION
 	// ========================================
 
 	@GetMapping("/register-student")
@@ -53,14 +53,16 @@ public class AuthController {
 
 		String rawPassword = user.getPassword();
 
+		// 1. Save the User (UserService handles password hashing)
 		try {
 			userService.registerNewStudent(user);
 		} catch (RuntimeException ex) {
+			// Handle duplicate email or other service errors
 			result.rejectValue("email", "duplicateEmail", "This email is already registered");
 			return "auth/registerForm";
 		}
 
-		// Auto-login
+		// 2. LOGIN using the authenticationManager
 		try {
 			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user.getEmail(), rawPassword);
 			Authentication authentication = authenticationManager.authenticate(authToken);
@@ -75,7 +77,7 @@ public class AuthController {
 			return "redirect:/login";
 		}
 
-		// Redirect to school page
+		// 3. Redirect a new user
 		String email = user.getEmail();
 		Optional<School> school = findSchoolByRecursiveDomain(email);
 
@@ -91,13 +93,25 @@ public class AuthController {
 	}
 
 	// ========================================
-	// LOGIN & LOGIN SUCCESS
+	// LOGIN
 	// ========================================
 
 	@GetMapping("/login")
-	public String showLoginPage() {
+	public String initLoginForm(Model model, HttpSession session) {
+		User user = new User();
+
+		String lastEmail = (String)session.getAttribute("LAST_EMAIL");
+		if(lastEmail != null) {
+			user.setEmail(lastEmail);
+			session.removeAttribute("LAST_EMAIL");
+		}
+		model.addAttribute("user", user);
 		return "auth/login";
 	}
+
+	// ========================================
+	// LOGIN SUCCESS
+	// ========================================
 
 	@GetMapping("/login-success")
 	public String processLoginSuccess(Principal principal, RedirectAttributes redirectAttributes) {
@@ -116,11 +130,11 @@ public class AuthController {
 	}
 
 	// ========================================
-	// MANAGER REGISTRATION (NEW)
+	// STAFF REGISTRATION (Car Repair Shop)
 	// ========================================
 
 	/**
-	 * Show manager registration page
+	 * Show registration page for staff (Manager, Receptionist, Technician)
 	 */
 	@GetMapping("/register")
 	public String showRegisterPage(Model model) {
@@ -129,23 +143,23 @@ public class AuthController {
 	}
 
 	/**
-	 * Process manager self-registration
-	 * Manager registers → is_approved = FALSE → waits for admin approval
+	 * Process staff registration
+	 * User registers → Admin approves → Admin assigns role
 	 */
 	@PostMapping("/register")
-	public String processManagerRegister(@Valid User user,
-										 BindingResult result,
-										 RedirectAttributes redirectAttributes) {
+	public String processUserRegister(@Valid User user,
+									  BindingResult result,
+									  RedirectAttributes redirectAttributes) {
 		if (result.hasErrors()) {
 			return "auth/register";
 		}
 
 		try {
-			// Register as MANAGER (not approved yet)
-			userService.registerNewManager(user);
+			// Register user (no role, needs admin approval)
+			userService.registerNewUser(user);
 
 			redirectAttributes.addFlashAttribute("messageSuccess",
-				"Registration successful! Your account is pending approval. You will be notified once approved.");
+				"Registration successful! Your account is pending admin approval.");
 			return "redirect:/login";
 
 		} catch (RuntimeException ex) {
@@ -160,14 +174,18 @@ public class AuthController {
 	// ========================================
 
 	private Optional<School> findSchoolByRecursiveDomain(String email) {
+		// 1. Extract the initial domain (e.g., "student.kirkwood.edu")
 		String domain = email.substring(email.indexOf("@") + 1);
 
+		// 2. Loop while the domain is valid (has at least one dot)
 		while (domain.contains(".")) {
+			// 3. Check Database
 			Optional<School> school = schoolRepository.findByDomain(domain);
 			if (school.isPresent()) {
-				return school;
+				return school; // Found match (e.g., "kirkwood.edu")
 			}
 
+			// 4. Strip the first part (e.g., "student.kirkwood.edu" -> "kirkwood.edu")
 			int dotIndex = domain.indexOf(".");
 			domain = domain.substring(dotIndex + 1);
 		}

@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.user;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,7 +30,10 @@ public class SecurityConfig {
 		http
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorize -> authorize
-				// Allow all GET requests (for viewing pages)
+				// ✅ FIXED: Protect admin pages BEFORE allowing all GET requests
+				.requestMatchers("/admin/**").hasRole("ADMIN")  // Admin only (GET and POST)
+
+				// Allow all other GET requests (for viewing pages)
 				.requestMatchers(HttpMethod.GET).permitAll()
 
 				// Allow POST for registration, login, and creating new subscriptions
@@ -45,7 +49,8 @@ public class SecurityConfig {
 				.defaultSuccessUrl("/login-success", true)
 				.failureHandler((request, response, exception) -> {
 					// Check if it's a disabled account
-					if (exception instanceof org.springframework.security.authentication.DisabledException) {
+					System.out.println(exception.getMessage());
+					if (exception instanceof DisabledException) {
 						response.sendRedirect("/login?disabled");
 					} else {
 						request.getSession().setAttribute("LAST_EMAIL", request.getParameter("email"));
@@ -58,6 +63,10 @@ public class SecurityConfig {
 				.logoutUrl("/logout")
 				.logoutSuccessUrl("/login?logout")
 				.permitAll()
+			)
+			// Handle access denied (when non-admin tries to access admin pages)
+			.exceptionHandling(exception -> exception
+				.accessDeniedPage("/access-denied")
 			);
 
 		return http.build();
