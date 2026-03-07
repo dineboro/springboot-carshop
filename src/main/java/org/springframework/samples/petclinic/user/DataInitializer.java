@@ -63,6 +63,7 @@ public class DataInitializer {
 			System.out.println("===============================================");
 			System.out.println("CHANGE THIS PASSWORD AFTER FIRST LOGIN!");
 			System.out.println("===============================================");
+			System.out.println(">>> Hash for Admin123!: " + passwordEncoder.encode("Admin123!"));
 
 		} catch (Exception e) {
 			System.err.println("Failed to create admin user: " + e.getMessage());
