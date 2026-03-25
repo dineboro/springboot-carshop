@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.util.Collection;
 import java.util.Map;
 
-@Controller //replace by ???
+@Controller // replace by ???
 public class SubscriptionController {
 
-	private final SubscriptionRepository subscriptionRepository; //replace by ???
+	private final SubscriptionRepository subscriptionRepository; // replace by ???
 
 	public SubscriptionController(SubscriptionRepository subscriptionRepository) {
 		this.subscriptionRepository = subscriptionRepository;
@@ -25,6 +25,7 @@ public class SubscriptionController {
 		model.addAttribute("subscriptions", subscriptions.stream().toList());
 		return "schools/pricing";
 	}
+
 	@GetMapping("/subscriptions/new")
 	public String initCreationForm(Map<String, Object> model) {
 		Subscription subscription = new Subscription();
@@ -40,8 +41,5 @@ public class SubscriptionController {
 		subscriptionRepository.save(subscription);
 		return "redirect:/pricing";
 	}
-
-
-
 
 }

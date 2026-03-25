@@ -1,42 +1,85 @@
 <!DOCTYPE html>
+<!--
+  auth/login.html
+  Rendered by AuthController.showLoginPage() → GET /login
+  Spring Security posts the form to /login automatically (no POST method needed in controller).
+  NO HTML `required` attributes used — custom error messages only (A-grade requirement).
+-->
 <html xmlns:th="https://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout (~{::body},'login')}">
 <body>
 
-<h2 class="text-center">Please Log In</h2>
+<h2 class="text-center">
+  <span class="fa fa-sign-in"></span> Log In
+</h2>
 
 <div class="container mt-4" style="max-width: 500px;">
 
-  <!-- Error Messages -->
-  <div th:if="${param.error}" class="alert alert-danger">
-    <strong>Login Failed!</strong> Invalid email or password.
-  </div>
-
-  <div th:if="${param.disabled}" class="alert alert-warning">
-    <strong>Account Pending!</strong> Your account is pending admin approval.
-  </div>
-
-  <div th:if="${param.logout}" class="alert alert-success">
-    You have been logged out successfully.
-  </div>
-
+  <!-- ── Flash messages from redirects (e.g. after registration) ──────────── -->
   <div th:if="${messageSuccess}" class="alert alert-success" th:text="${messageSuccess}"></div>
+  <div th:if="${messageWarning}" class="alert alert-warning" th:text="${messageWarning}"></div>
+  <div th:if="${messageDanger}"  class="alert alert-danger"  th:text="${messageDanger}"></div>
 
-  <!-- Login Form - Instructor's version with ${user} model -->
+  <!-- ── Spring Security query-param messages ─────────────────────────────── -->
+
+  <!--
+    ?error → Spring Security redirects here when credentials are wrong.
+    The failureHandler in SecurityConfig also stores the submitted email
+    in the session as LAST_EMAIL so the controller can pre-fill the field.
+  -->
+  <div th:if="${param.error}" class="alert alert-danger">
+    <span class="fa fa-exclamation-circle"></span>
+    <strong>Login Failed!</strong> The email or password you entered is incorrect.
+    Please try again.
+  </div>
+
+  <!--
+    ?disabled → SecurityConfig's failureHandler sends this when
+    UserDetailsServiceImpl throws DisabledException (account not yet approved).
+  -->
+  <div th:if="${param.disabled}" class="alert alert-warning">
+    <span class="fa fa-clock-o"></span>
+    <strong>Account Pending Approval.</strong>
+    Your account has been registered but is awaiting admin approval.
+    Please contact an administrator.
+  </div>
+
+  <!--
+    ?logout → Spring Security's logoutSuccessUrl("/login?logout") sends this.
+    Confirms the user was logged out (A-grade requirement).
+  -->
+  <div th:if="${param.logout}" class="alert alert-success">
+    <span class="fa fa-check-circle"></span>
+    You have been successfully logged out.
+  </div>
+
+  <!-- ── Login form ────────────────────────────────────────────────────────── -->
+  <!--
+    th:action="@{/login}" posts to Spring Security's login processing URL.
+    th:object="${user}"  enables the inputField fragment's th:field binding
+    which shows inline validation errors when re-rendered.
+    NO `required` attributes anywhere — validation is server-side only.
+  -->
   <form th:action="@{/login}" th:object="${user}" method="post" class="form-horizontal">
 
-    <div th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}"></div>
+    <!-- Email field — uses shared inputField fragment for consistent styling -->
+    <div th:replace="~{fragments/inputField :: input ('Email Address', 'email', 'text')}"></div>
+
+    <!-- Password field -->
     <div th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}"></div>
 
+    <!-- Submit -->
     <div class="d-grid gap-2 mt-4">
-      <button type="submit" class="btn btn-primary">
+      <button type="submit" class="btn btn-primary btn-lg">
         <span class="fa fa-sign-in"></span> Log In
       </button>
     </div>
 
-    <!-- Single Register Link -->
+    <!-- Link to registration -->
     <div class="text-center mt-3">
-      <p>Don't have an account? <a th:href="@{/register-student}">Register here</a></p>
+      <p>Don't have an account?
+        <a th:href="@{/register}">Register here</a>
+      </p>
     </div>
 
   </form>

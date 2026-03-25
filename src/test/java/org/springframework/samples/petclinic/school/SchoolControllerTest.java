@@ -65,6 +65,7 @@ class SchoolControllerTest {
 			.andExpect(model().attributeExists("currentPage"))
 			.andExpect(view().name("schools/schoolList"));
 	}
+
 	@Test
 	@DisplayName("User clicks \"Add School\" -> GET /schools/new")
 	void testInitCreationForm() throws Exception {
@@ -73,12 +74,11 @@ class SchoolControllerTest {
 			.andExpect(view().name("schools/createOrUpdateSchoolForm"))
 			.andExpect(model().attributeExists("school"));
 	}
+
 	@Test
 	@DisplayName("Validation Passed -> verify that the controller tells the repository to save() the school and then redirects us.")
 	void testProcessCreationFormSuccess() throws Exception {
-		mockMvc.perform(post("/schools/new")
-				.param("name", "University of Iowa")
-				.param("domain", "uiowa.edu"))
+		mockMvc.perform(post("/schools/new").param("name", "University of Iowa").param("domain", "uiowa.edu"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/schools"));
 
@@ -89,12 +89,16 @@ class SchoolControllerTest {
 	@Test
 	@DisplayName("Validation Failed -> send an empty domain and ensure the controller returns us to the form instead of saving.")
 	void testProcessCreationFormHasErrors() throws Exception {
-		mockMvc.perform(post("/schools/new")
-				.param("name", "Bad School")
-				.param("domain", "")) // Empty domain should trigger @NotEmpty
-			.andExpect(status().isOk()) // 200 OK because we are re-rendering the form, not redirecting
+		mockMvc.perform(post("/schools/new").param("name", "Bad School").param("domain", "")) // Empty
+																								// domain
+																								// should
+																								// trigger
+																								// @NotEmpty
+			.andExpect(status().isOk()) // 200 OK because we are re-rendering the form,
+										// not redirecting
 			.andExpect(model().attributeHasErrors("school"))
 			.andExpect(model().attributeHasFieldErrors("school", "domain"))
 			.andExpect(view().name("schools/createOrUpdateSchoolForm"));
 	}
+
 }

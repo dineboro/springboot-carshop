@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
+
 	private final UserRepository userRepository;
 
 	public UserDetailsServiceImpl(UserRepository userRepository) {
@@ -35,15 +36,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		}
 
 		// 4. Build authorities — use ROLE_ prefix to match Spring Security conventions
-		List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+		List<SimpleGrantedAuthority> authorities = user.getRoles()
+			.stream()
 			.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
 			.collect(Collectors.toList());
-
-		// 5. Return UserDetails
+		//5. Block Deleted Account
+		if(user.getDeletedAt()!= null){
+			throw new UsernameNotFoundException("No user found with email '" + email +"'.");
+		}
+		// 6. Return UserDetails
 		return org.springframework.security.core.userdetails.User.builder()
 			.username(user.getEmail())
 			.password(user.getPassword())
 			.authorities(authorities)
 			.build();
 	}
+
 }

@@ -60,7 +60,7 @@ public class CustomerController {
 		ModelAndView mav = new ModelAndView("customers/customerDetails");
 		Customer customer = customerRepository.findById(customerId)
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-				"Customer with id " + customerId + " not found."));
+					"Customer with id " + customerId + " not found."));
 		mav.addObject(customer);
 		return mav;
 	}
@@ -74,15 +74,15 @@ public class CustomerController {
 
 	@GetMapping("/customers/search")
 	public String processFindForm(@RequestParam(defaultValue = "1") int page,
-								  @RequestParam(required = false) String customerName,
-								  Model model) {
+			@RequestParam(required = false) String customerName, Model model) {
 		// If no search term provided, show all customers
 		Pageable pageable = PageRequest.of(page - 1, 5);
 		Page<Customer> customerPage;
 
 		if (customerName == null || customerName.isEmpty()) {
 			customerPage = customerRepository.findAll(pageable);
-		} else {
+		}
+		else {
 			customerPage = customerRepository.findByNameContaining(customerName, pageable);
 		}
 
@@ -104,14 +104,14 @@ public class CustomerController {
 	public String initUpdateForm(@PathVariable("customerId") int customerId, Model model) {
 		Customer customer = customerRepository.findById(customerId)
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-				"Customer with id " + customerId + " not found."));
+					"Customer with id " + customerId + " not found."));
 		model.addAttribute("customer", customer);
 		return "customers/createOrUpdateCustomerForm";
 	}
 
 	@PostMapping("/customers/{customerId}/edit")
 	public String processUpdateForm(@Valid Customer customer, BindingResult result,
-									@PathVariable("customerId") int customerId) {
+			@PathVariable("customerId") int customerId) {
 		if (result.hasErrors()) {
 			return "customers/createOrUpdateCustomerForm";
 		}

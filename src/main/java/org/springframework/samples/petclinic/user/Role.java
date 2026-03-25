@@ -23,8 +23,9 @@ public class Role {
 	// Mapped by the 'roles' field in the User entity.
 	@ManyToMany(mappedBy = "roles")
 	@EqualsAndHashCode.Exclude
-	@ToString.Exclude          // ADD THIS
+	@ToString.Exclude // ADD THIS
 	private Set<User> users;
 
 	// We will add the relationship to Permissions later.
+
 }

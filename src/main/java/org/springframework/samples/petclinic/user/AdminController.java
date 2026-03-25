@@ -12,6 +12,7 @@ import java.util.List;
 public class AdminController {
 
 	private final UserRepository userRepository;
+
 	private final UserService userService;
 
 	public AdminController(UserRepository userRepository, UserService userService) {
@@ -35,8 +36,7 @@ public class AdminController {
 	 */
 	@GetMapping("/approve-form/{id}")
 	public String showApprovalForm(@PathVariable Integer id, Model model) {
-		User user = userRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
 		model.addAttribute("user", user);
 		return "admin/approveUserForm";
@@ -46,11 +46,9 @@ public class AdminController {
 	 * Approve user AND assign role
 	 */
 	@PostMapping("/approve/{id}")
-	public String approveUserWithRole(@PathVariable Integer id,
-									  @RequestParam String roleName,
-									  RedirectAttributes redirectAttributes) {
-		User user = userRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+	public String approveUserWithRole(@PathVariable Integer id, @RequestParam String roleName,
+			RedirectAttributes redirectAttributes) {
+		User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
 		// Approve user
 		user.setIsApproved(true);
@@ -60,7 +58,7 @@ public class AdminController {
 		userService.assignRole(id, roleName);
 
 		redirectAttributes.addFlashAttribute("messageSuccess",
-			"User " + user.getEmail() + " has been approved as " + roleName);
+				"User " + user.getEmail() + " has been approved as " + roleName);
 		return "redirect:/admin/pending-approvals";
 	}
 
@@ -68,11 +66,9 @@ public class AdminController {
 	 * Quick approve with default role selection (alternative method)
 	 */
 	@PostMapping("/quick-approve/{id}")
-	public String quickApproveUser(@PathVariable Integer id,
-								   @RequestParam String role,
-								   RedirectAttributes redirectAttributes) {
-		User user = userRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+	public String quickApproveUser(@PathVariable Integer id, @RequestParam String role,
+			RedirectAttributes redirectAttributes) {
+		User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
 		// Approve user
 		user.setIsApproved(true);
@@ -81,8 +77,7 @@ public class AdminController {
 		// Assign selected role
 		userService.assignRole(id, role);
 
-		redirectAttributes.addFlashAttribute("messageSuccess",
-			"User " + user.getEmail() + " approved as " + role);
+		redirectAttributes.addFlashAttribute("messageSuccess", "User " + user.getEmail() + " approved as " + role);
 
 		return "redirect:/admin/pending-approvals";
 	}
@@ -92,13 +87,12 @@ public class AdminController {
 	 */
 	@PostMapping("/reject/{id}")
 	public String rejectUser(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-		User user = userRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
 		userRepository.delete(user);
 
-		redirectAttributes.addFlashAttribute("messageSuccess",
-			"User registration rejected and deleted");
+		redirectAttributes.addFlashAttribute("messageSuccess", "User registration rejected and deleted");
 		return "redirect:/admin/pending-approvals";
 	}
+
 }

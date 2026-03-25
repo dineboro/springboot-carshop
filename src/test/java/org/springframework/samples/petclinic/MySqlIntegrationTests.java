@@ -127,14 +127,12 @@ class MySqlIntegrationTests {
 
 		// This will test if the endpoint exists and returns 200 or redirects to login
 		try {
-			ResponseEntity<String> result = template.exchange(
-				RequestEntity.get("/users/profile").build(),
-				String.class
-			);
+			ResponseEntity<String> result = template.exchange(RequestEntity.get("/users/profile").build(),
+					String.class);
 			// Accept either OK (if logged in) or redirect (if requires login)
-			assertThat(result.getStatusCode().is2xxSuccessful() ||
-				result.getStatusCode().is3xxRedirection()).isTrue();
-		} catch (Exception e) {
+			assertThat(result.getStatusCode().is2xxSuccessful() || result.getStatusCode().is3xxRedirection()).isTrue();
+		}
+		catch (Exception e) {
 			// If endpoint doesn't exist, that's okay - just testing database integration
 			assertThat(users.findAll()).isNotEmpty();
 		}
@@ -166,10 +164,7 @@ class MySqlIntegrationTests {
 	void testCustomerDetails() {
 		// Test that we can access customer details via REST endpoint
 		RestTemplate template = builder.rootUri("http://localhost:" + port).build();
-		ResponseEntity<String> result = template.exchange(
-			RequestEntity.get("/customers/1").build(),
-			String.class
-		);
+		ResponseEntity<String> result = template.exchange(RequestEntity.get("/customers/1").build(), String.class);
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).contains("John Doe");
 	}
@@ -178,10 +173,7 @@ class MySqlIntegrationTests {
 	void testCustomerList() {
 		// Test that we can access customer list via REST endpoint
 		RestTemplate template = builder.rootUri("http://localhost:" + port).build();
-		ResponseEntity<String> result = template.exchange(
-			RequestEntity.get("/customers").build(),
-			String.class
-		);
+		ResponseEntity<String> result = template.exchange(RequestEntity.get("/customers").build(), String.class);
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
@@ -189,10 +181,9 @@ class MySqlIntegrationTests {
 	void testCustomerSearch() {
 		// Test customer search functionality
 		RestTemplate template = builder.rootUri("http://localhost:" + port).build();
-		ResponseEntity<String> result = template.exchange(
-			RequestEntity.get("/customers/search?customerName=John").build(),
-			String.class
-		);
+		ResponseEntity<String> result = template
+			.exchange(RequestEntity.get("/customers/search?customerName=John").build(), String.class);
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
+
 }

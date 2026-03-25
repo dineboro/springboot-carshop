@@ -102,7 +102,7 @@
   <!-- Buttons -->
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <button class="btn btn-primary" type="submit">
+      <button class="btn btn-primary mt-0" type="submit">
         <span class="fa" th:classappend="${customer.customerId == null} ? 'fa-plus' : 'fa-save'"></span>
         <span th:text="${customer.customerId == null} ? #{button.add} : #{button.update}">Submit</span>
       </button>

@@ -25,10 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Test class for the {@link CustomerController}
  *
- * Tests follow the Arrange-Act-Assert (AAA) pattern:
- * - Arrange: Set up test data and mock behaviors
- * - Act: Execute the method under test
- * - Assert: Verify the expected outcomes
+ * Tests follow the Arrange-Act-Assert (AAA) pattern: - Arrange: Set up test data and mock
+ * behaviors - Act: Execute the method under test - Assert: Verify the expected outcomes
  */
 @WebMvcTest(CustomerController.class)
 class CustomerControllerTest {
@@ -104,8 +102,8 @@ class CustomerControllerTest {
 		String validEmail = "jane.smith@example.com";
 
 		// Act: Submit form with valid data
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
+		mockMvc
+			.perform(post("/customers/new").param("customerName", validName)
 				.param("phone", validPhone)
 				.param("email", validEmail))
 			// Assert: Should redirect to customer list
@@ -124,8 +122,8 @@ class CustomerControllerTest {
 		String validPhone = "5551112222";
 
 		// Act: Submit form without email
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
+		mockMvc
+			.perform(post("/customers/new").param("customerName", validName)
 				.param("phone", validPhone)
 				.param("status", "ACTIVE"))
 			// Assert: Should succeed
@@ -146,8 +144,8 @@ class CustomerControllerTest {
 		String validStatus = "ACTIVE";
 
 		// Act: Submit complete form
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
+		mockMvc
+			.perform(post("/customers/new").param("customerName", validName)
 				.param("phone", validPhone)
 				.param("email", validEmail)
 				.param("status", validStatus))
@@ -171,9 +169,7 @@ class CustomerControllerTest {
 		String validPhone = "5551234567";
 
 		// Act: Submit form with empty name
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", emptyName)
-				.param("phone", validPhone))
+		mockMvc.perform(post("/customers/new").param("customerName", emptyName).param("phone", validPhone))
 			// Assert: Should return to form with errors
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -192,9 +188,7 @@ class CustomerControllerTest {
 		String emptyPhone = "";
 
 		// Act: Submit form with empty phone
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
-				.param("phone", emptyPhone))
+		mockMvc.perform(post("/customers/new").param("customerName", validName).param("phone", emptyPhone))
 			// Assert: Should return to form with errors
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -213,9 +207,7 @@ class CustomerControllerTest {
 		String emptyPhone = "";
 
 		// Act: Submit form with multiple empty required fields
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", emptyName)
-				.param("phone", emptyPhone))
+		mockMvc.perform(post("/customers/new").param("customerName", emptyName).param("phone", emptyPhone))
 			// Assert: Should return to form with multiple errors
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -235,9 +227,7 @@ class CustomerControllerTest {
 		String shortPhone = "12345";
 
 		// Act: Submit form with phone too short
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
-				.param("phone", shortPhone))
+		mockMvc.perform(post("/customers/new").param("customerName", validName).param("phone", shortPhone))
 			// Assert: Should return to form with phone error
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -256,9 +246,7 @@ class CustomerControllerTest {
 		String longPhone = "12345678901";
 
 		// Act: Submit form with phone too long
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
-				.param("phone", longPhone))
+		mockMvc.perform(post("/customers/new").param("customerName", validName).param("phone", longPhone))
 			// Assert: Should return to form with phone error
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -277,9 +265,7 @@ class CustomerControllerTest {
 		String phoneWithDashes = "555-123-4567";
 
 		// Act: Submit form with dashes in phone
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
-				.param("phone", phoneWithDashes))
+		mockMvc.perform(post("/customers/new").param("customerName", validName).param("phone", phoneWithDashes))
 			// Assert: Should return to form with phone error
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -298,9 +284,7 @@ class CustomerControllerTest {
 		String phoneWithSpaces = "555 123 4567";
 
 		// Act: Submit form with spaces in phone
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
-				.param("phone", phoneWithSpaces))
+		mockMvc.perform(post("/customers/new").param("customerName", validName).param("phone", phoneWithSpaces))
 			// Assert: Should return to form with phone error
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -319,9 +303,7 @@ class CustomerControllerTest {
 		String phoneWithLetters = "555ABC4567";
 
 		// Act: Submit form with letters in phone
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
-				.param("phone", phoneWithLetters))
+		mockMvc.perform(post("/customers/new").param("customerName", validName).param("phone", phoneWithLetters))
 			// Assert: Should return to form with phone error
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("customer"))
@@ -341,8 +323,8 @@ class CustomerControllerTest {
 		String invalidEmail = "not-an-email";
 
 		// Act: Submit form with invalid email
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
+		mockMvc
+			.perform(post("/customers/new").param("customerName", validName)
 				.param("phone", validPhone)
 				.param("email", invalidEmail))
 			// Assert: Should return to form with email error
@@ -363,8 +345,8 @@ class CustomerControllerTest {
 		String invalidEmail = "bad-email";
 
 		// Act: Submit form with multiple validation errors
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", emptyName)
+		mockMvc
+			.perform(post("/customers/new").param("customerName", emptyName)
 				.param("phone", shortPhone)
 				.param("email", invalidEmail))
 			// Assert: Should return to form with all field errors
@@ -390,9 +372,7 @@ class CustomerControllerTest {
 		String validPhone = "5551234567";
 
 		// Act: Submit form with long name
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", veryLongName)
-				.param("phone", validPhone))
+		mockMvc.perform(post("/customers/new").param("customerName", veryLongName).param("phone", validPhone))
 			// Assert: Should succeed
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/customers"));
@@ -409,8 +389,8 @@ class CustomerControllerTest {
 		String validPhone = "5551234567";
 
 		// Act: Submit form with INACTIVE status
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
+		mockMvc
+			.perform(post("/customers/new").param("customerName", validName)
 				.param("phone", validPhone)
 				.param("status", "INACTIVE"))
 			// Assert: Should succeed (status can be any valid enum value)
@@ -429,8 +409,8 @@ class CustomerControllerTest {
 		String validPhone = "5551234567";
 
 		// Act: Submit form with SUSPENDED status
-		mockMvc.perform(post("/customers/new")
-				.param("customerName", validName)
+		mockMvc
+			.perform(post("/customers/new").param("customerName", validName)
 				.param("phone", validPhone)
 				.param("status", "SUSPENDED"))
 			// Assert: Should succeed
@@ -440,4 +420,5 @@ class CustomerControllerTest {
 		// Assert: Save was called
 		verify(customers).save(any(Customer.class));
 	}
+
 }

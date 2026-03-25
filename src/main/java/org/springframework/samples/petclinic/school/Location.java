@@ -52,8 +52,11 @@ public class Location extends NamedEntity {
 	private LocalDateTime deletedAt;
 
 	public enum LocationStatus {
+
 		DRAFT, ACTIVE, CLOSED, COMING_SOON;
+
 	}
 
 	// No more manual code below this line!
+
 }

@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.customer;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class Customer {
 	private Integer customerId;
 
 	@Column(name = "user_id")
-	private Integer userId;  // Links to users table when customer registers for portal
+	private Integer userId; // Links to users table when customer registers for portal
 
 	@Column(name = "customer_name")
 	@NotEmpty(message = "{NotEmpty.customer.name}")
@@ -40,6 +41,7 @@ public class Customer {
 	private String phone;
 
 	@Column(name = "email")
+	@Email(message = "Please enter a valid email address")
 	private String email;
 
 	@Enumerated(EnumType.STRING)
@@ -64,7 +66,9 @@ public class Customer {
 	}
 
 	public enum CustomerStatus {
+
 		ACTIVE, INACTIVE, SUSPENDED
+
 	}
 
 }

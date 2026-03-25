@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface SchoolRepository extends Repository<School, Integer> {
+
 	@Transactional(readOnly = true)
 	Collection<School> findAll();
 
@@ -24,4 +25,5 @@ public interface SchoolRepository extends Repository<School, Integer> {
 	@Transactional(readOnly = true)
 	@Query("SELECT s FROM School s WHERE s.domain = :domain")
 	Optional<School> findByDomain(String domain);
+
 }

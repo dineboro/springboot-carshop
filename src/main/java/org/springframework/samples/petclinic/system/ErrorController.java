@@ -7,11 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ErrorController {
 
 	/**
-	 * Access denied error page (403)
-	 * Shown when user tries to access admin pages without ADMIN role
+	 * Access denied error page (403) Shown when user tries to access admin pages without
+	 * ADMIN role
 	 */
 	@GetMapping("/access-denied")
 	public String accessDenied() {
 		return "accessDenied";
 	}
+
 }

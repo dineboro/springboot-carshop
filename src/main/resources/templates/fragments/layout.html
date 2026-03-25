@@ -2,7 +2,7 @@
 
 <html th:fragment="layout (template, menu)"
       xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
 >
 
 <head>
@@ -15,6 +15,48 @@
   <title th:text="#{layoutTitle}">PetClinic :: a Spring Framework demonstration</title>
   <link th:href="@{/webjars/font-awesome/css/font-awesome.min.css}" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/resources/css/petclinic.css}" />
+
+
+  <style>
+    .navbar-nav button.nav-link {
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      padding: 28px 8px;
+      display: flex;
+      align-items: center;
+      text-transform: uppercase;
+      font-size: 14px;
+      font-family: 'montserratregular', sans-serif;
+    }
+    @media (max-width: 991.98px) {
+      .navbar-nav form {
+        width: 100%;
+      }
+      .navbar-nav button.nav-link {
+        padding: 28px 20px;
+        width: 100%;
+        justify-content: flex-start; /* Moves icon/text to the left */
+        text-align: left; /* Fallback for older browsers */
+      }
+    }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready(function(){
+      $('.navbar-nav button.nav-link').hover(
+        function() {
+          // Code to execute on mouse enter (function_in)
+          $(this).css("background-color", "#6db33f");
+        },
+        function() {
+          // Code to execute on mouse leave (function_out)
+          $(this).css("background-color", "rgba(0, 0, 0, 0)");
+        }
+      );
+    });
+  </script>
 
 </head>
 

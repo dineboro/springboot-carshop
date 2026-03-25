@@ -23,6 +23,7 @@ import java.util.List;
 // Automatically filter out deleted rows when reading data
 @SQLRestriction("deleted_at IS NULL")
 public class School extends NamedEntity {
+
 	@Column(name = "domain", unique = true)
 	@NotEmpty
 	private String domain;
@@ -47,7 +48,11 @@ public class School extends NamedEntity {
 		location.setSchool(this);
 		getLocations().add(location);
 	}
+
 	public enum SchoolStatus {
+
 		ACTIVE, INACTIVE, SUSPENDED
+
 	}
+
 }

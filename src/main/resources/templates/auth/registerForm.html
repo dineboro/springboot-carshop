@@ -9,8 +9,8 @@
 
   <form th:object="${user}" class="form-horizontal" method="post">
 
-    <input th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}" />
-    <input th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}" />
+    <div th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}"></div>
+    <div th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}"></div>
 
     <div class="form-group">
       <div class="d-grid gap-2 mt-4">

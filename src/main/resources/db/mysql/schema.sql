@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) NOT NULL,
   public_email TINYINT DEFAULT 0,
   phone VARCHAR(255),
+  preferred_language varchar(50) null,
   public_phone TINYINT DEFAULT 0,
   password_hash VARCHAR(255),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS users (
   deleted_at DATETIME,
   UNIQUE INDEX idx_users_email (email),
   INDEX idx_users_name (last_name, first_name)
-  );
+  ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS roles (
                                    id INT AUTO_INCREMENT PRIMARY KEY,
@@ -108,7 +109,7 @@ CREATE TABLE IF NOT EXISTS schools (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at DATETIME DEFAULT NULL,
   UNIQUE INDEX idx_schools_domain (domain)
-  );
+  )engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS locations (
                                        id INT AUTO_INCREMENT PRIMARY KEY,
@@ -124,8 +125,9 @@ CREATE TABLE IF NOT EXISTS locations (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at DATETIME DEFAULT NULL,
   CONSTRAINT fk_locations_school FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE,
-  CONSTRAINT fk_locations_parent FOREIGN KEY (parent_location_id) REFERENCES locations(id) ON DELETE SET NULL
-  );
+  CONSTRAINT fk_locations_parent FOREIGN KEY (parent_location_id) REFERENCES locations(id) ON DELETE SET NULL,
+  UNIQUE KEY uk_school_location (school_id, name)
+  )engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS subscriptions (
                                            id INT AUTO_INCREMENT PRIMARY KEY,
@@ -137,4 +139,4 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at DATETIME,
   UNIQUE KEY uk_subscription_name (name)
-  );
+  )engine=InnoDB;

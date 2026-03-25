@@ -10,10 +10,13 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+
 	private final RoleRepository roleRepository;
+
 	private final PasswordEncoder passwordEncoder;
 
-	public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+	public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
+			PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
 		this.passwordEncoder = passwordEncoder;
@@ -43,9 +46,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * NEW: Register any user (Manager, Receptionist, Technician)
-	 * - No role assigned (admin will assign later)
-	 * - Requires admin approval
+	 * NEW: Register any user (Manager, Receptionist, Technician) - No role assigned
+	 * (admin will assign later) - Requires admin approval
 	 */
 	@Override
 	public User registerNewUser(User user) {
@@ -54,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
 		// Set as NOT approved (admin must approve AND assign role)
 		user.setIsActive(true);
-		user.setIsApproved(false);  // ← Requires approval
+		user.setIsApproved(false); // ← Requires approval
 
 		// NO ROLE ASSIGNED - admin will assign role when approving
 		user.setRoles(new HashSet<>());
@@ -91,8 +93,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public void assignRole(Integer userId, String roleName) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
 		Role role = roleRepository.findByName(roleName)
 			.orElseThrow(() -> new RuntimeException(roleName + " role not found"));
@@ -107,4 +108,5 @@ public class UserServiceImpl implements UserService {
 
 		userRepository.save(user);
 	}
+
 }

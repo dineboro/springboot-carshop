@@ -14,12 +14,13 @@ import java.util.Set;
 public class DataInitializer {
 
 	private final UserRepository userRepository;
+
 	private final RoleRepository roleRepository;
+
 	private final PasswordEncoder passwordEncoder;
 
-	public DataInitializer(UserRepository userRepository,
-						   RoleRepository roleRepository,
-						   PasswordEncoder passwordEncoder) {
+	public DataInitializer(UserRepository userRepository, RoleRepository roleRepository,
+			PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
 		this.passwordEncoder = passwordEncoder;
@@ -42,7 +43,7 @@ public class DataInitializer {
 			admin.setPassword(passwordEncoder.encode("Admin123!"));
 			admin.setPhone("5551234567");
 			admin.setIsActive(true);
-			admin.setIsApproved(true);  // Admin is pre-approved
+			admin.setIsApproved(true); // Admin is pre-approved
 
 			// Assign ADMIN role
 			Role adminRole = roleRepository.findByName("ADMIN")
@@ -65,9 +66,11 @@ public class DataInitializer {
 			System.out.println("===============================================");
 			System.out.println(">>> Hash for Admin123!: " + passwordEncoder.encode("Admin123!"));
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			System.err.println("Failed to create admin user: " + e.getMessage());
 			System.err.println("Please make sure ADMIN role exists in the 'roles' table");
 		}
 	}
+
 }

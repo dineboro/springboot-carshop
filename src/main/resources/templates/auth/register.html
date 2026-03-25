@@ -1,54 +1,81 @@
+<!DOCTYPE html>
+<!--
+  auth/register.html
+  Rendered by AuthController.showRegisterPage()  → GET  /register
+  Submitted to  AuthController.processUserRegister() → POST /register
+  NO HTML `required` attributes — validation handled server-side by Bean Validation
+  annotations on User.java and custom messages returned via BindingResult (B-grade req).
+-->
 <html xmlns:th="https://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout (~{::body},'register')}">
-
 <body>
 
-<h2 class="text-center">Register as Staff</h2>
+<h2 class="text-center">
+  <span class="fa fa-user-plus"></span> Create Staff Account
+</h2>
 
 <div class="container mt-4" style="max-width: 500px;">
 
-  <p class="text-muted text-center">Register for staff account (requires admin approval)</p>
+  <p class="text-muted text-center">
+    Staff accounts require administrator approval before you can log in.
+  </p>
 
-  <form th:object="${user}" class="form-horizontal" method="post">
+  <!-- ── Flash messages (shown when the controller re-renders after an error) -->
+  <div th:if="${messageSuccess}" class="alert alert-success" th:text="${messageSuccess}"></div>
 
-    <!-- First Name -->
-    <input th:replace="~{fragments/inputField :: input ('First Name', 'firstName', 'text')}" />
+  <!-- ── Registration form ─────────────────────────────────────────────────── -->
+  <!--
+    th:action="@{/register}" — explicitly set so the form always posts to /register
+    even when Thymeleaf is rendering inside a layout fragment.
+    th:object="${user}"      — binds to the User model attribute from the controller.
+    NO `required` attributes on any input — all validation is done server-side.
+  -->
+  <form th:action="@{/register}" th:object="${user}" class="form-horizontal" method="post">
 
-    <!-- Last Name -->
-    <input th:replace="~{fragments/inputField :: input ('Last Name', 'lastName', 'text')}" />
+    <!-- First Name — maps to User.firstName (@Column name="first_name") -->
+    <div th:replace="~{fragments/inputField :: input ('First Name', 'firstName', 'text')}"></div>
 
-    <!-- Email -->
-    <input th:replace="~{fragments/inputField :: input ('Email', 'email', 'text')}" />
+    <!-- Last Name — maps to User.lastName -->
+    <div th:replace="~{fragments/inputField :: input ('Last Name', 'lastName', 'text')}"></div>
 
-    <!-- Phone (Optional) -->
+    <!-- Email — @NotEmpty + @Email validation on User.java -->
+    <div th:replace="~{fragments/inputField :: input ('Email Address', 'email', 'text')}"></div>
+
+    <!-- Phone — optional field, rendered manually so we can add helper text -->
     <div class="mb-3">
-      <label for="phone" class="form-label">Phone (Optional)</label>
+      <label for="phone" class="form-label">Phone <span class="text-muted">(Optional)</span></label>
       <div class="position-relative">
         <input type="tel"
                id="phone"
                th:field="*{phone}"
-               class="form-control"
-               placeholder="Enter your phone number">
+               th:class="${#fields.hasErrors('phone')} ? 'form-control is-invalid' : 'form-control'"
+               placeholder="5551234567" />
+        <div th:if="${#fields.hasErrors('phone')}" class="invalid-feedback" style="display:block">
+          <span th:errors="*{phone}">Phone error</span>
+        </div>
       </div>
+      <small class="form-text text-muted">10 digits, no spaces or dashes</small>
     </div>
 
-    <!-- Password -->
-    <input th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}" />
+    <!-- Password — @NotEmpty + @Size(min=8) + @Pattern validation on User.java -->
+    <div th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}"></div>
 
-    <small class="form-text text-muted">
-      Password must be at least 8 characters with uppercase, lowercase, and a number
+    <small class="form-text text-muted d-block mb-3">
+      <span class="fa fa-info-circle"></span>
+      Password must be at least 8 characters and include an uppercase letter,
+      a lowercase letter, and a number.
     </small>
 
-    <!-- Submit Button -->
-    <div class="d-grid gap-2 mt-4">
-      <button class="btn btn-primary" type="submit">
+    <!-- Submit -->
+    <div class="d-grid gap-2 mt-3">
+      <button class="btn btn-primary btn-lg" type="submit">
         <span class="fa fa-user-plus"></span> Register
       </button>
     </div>
 
-    <!-- Login Link -->
+    <!-- Link back to login -->
     <div class="text-center mt-3">
-      <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
+      <p>Already have an account? <a th:href="@{/login}">Log in here</a></p>
     </div>
 
   </form>

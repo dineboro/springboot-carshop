@@ -27,24 +27,36 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.csrf(csrf -> csrf.disable())
+		http.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorize -> authorize
-				// ✅ FIXED: Protect admin pages BEFORE allowing all GET requests
-				.requestMatchers("/admin/**").hasRole("ADMIN")  // Admin only (GET and POST)
+				// FIXED: Protect admin pages BEFORE allowing all GET requests
+				.requestMatchers("/admin/**")
+				.hasRole("ADMIN") // Admin only (GET and POST)
 
 				// Allow all other GET requests (for viewing pages)
-				.requestMatchers(HttpMethod.GET).permitAll()
+				.requestMatchers(HttpMethod.GET)
+				.permitAll()
+
+				// Public pages anyone can see
+				.requestMatchers("/", "/schools/**", "/register-student", "/css/**", "/images/**").permitAll()
+
+				// ADD THIS LINE: Require login for the profile and any other user settings
+				.requestMatchers("/users/profile", "/users/delete").authenticated()
 
 				// Allow POST for registration, login, and creating new subscriptions
-				.requestMatchers("/register-student", "/register", "/login", "/schools/new", "/owners/new", "/subscriptions/new").permitAll()
+				.requestMatchers("/register-student",
+									"/register",
+									"/login",
+									"/schools/new",
+									"/owners/new",
+									"/subscriptions/new")
+				.permitAll()
 
 				// Protect all other requests
-				.anyRequest().authenticated()
-			)
+				.anyRequest()
+				.authenticated())
 			.httpBasic(AbstractHttpConfigurer::disable)
-			.formLogin(form -> form
-				.loginPage("/login")
+			.formLogin(form -> form.loginPage("/login")
 				.usernameParameter("email")
 				.defaultSuccessUrl("/login-success", true)
 				.failureHandler((request, response, exception) -> {
@@ -52,23 +64,18 @@ public class SecurityConfig {
 					System.out.println(exception.getMessage());
 					if (exception instanceof DisabledException) {
 						response.sendRedirect("/login?disabled");
-					} else {
+					}
+					else {
 						request.getSession().setAttribute("LAST_EMAIL", request.getParameter("email"));
 						response.sendRedirect("/login?error");
 					}
 				})
-				.permitAll()
-			)
-			.logout(logout -> logout
-				.logoutUrl("/logout")
-				.logoutSuccessUrl("/login?logout")
-				.permitAll()
-			)
+				.permitAll())
+			.logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll())
 			// Handle access denied (when non-admin tries to access admin pages)
-			.exceptionHandling(exception -> exception
-				.accessDeniedPage("/access-denied")
-			);
+			.exceptionHandling(exception -> exception.accessDeniedPage("/access-denied"));
 
 		return http.build();
 	}
+
 }

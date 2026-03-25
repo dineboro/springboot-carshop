@@ -19,6 +19,7 @@ import java.util.Map;
 
 @Controller
 public class SchoolController {
+
 	private final SchoolRepository schoolRepository;
 
 	public SchoolController(SchoolRepository schoolRepository) {
@@ -43,7 +44,6 @@ public class SchoolController {
 		return "redirect:/schools";
 	}
 
-
 	@GetMapping("/schools")
 	public String showSchoolList(@RequestParam(defaultValue = "1") int page, Model model) {
 		// Pagination setup (5 items per page)
@@ -63,7 +63,8 @@ public class SchoolController {
 	public ModelAndView showSchool(@PathVariable("schoolId") int schoolId) {
 		ModelAndView mav = new ModelAndView("schools/schoolDetails");
 		School school = schoolRepository.findById(schoolId)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "School with id " + schoolId + " not found."));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"School with id " + schoolId + " not found."));
 		mav.addObject(school);
 		return mav;
 	}
@@ -76,7 +77,8 @@ public class SchoolController {
 		String fullDomain = slug + ".edu";
 		ModelAndView mav = new ModelAndView("schools/schoolDetails");
 		School school = schoolRepository.findByDomain(fullDomain)
-			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "School with domain '" + fullDomain + "' not found."));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"School with domain '" + fullDomain + "' not found."));
 		mav.addObject(school);
 		return mav;
 	}

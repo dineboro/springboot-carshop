@@ -37,11 +37,13 @@ public class UniqueDomainValidator implements ConstraintValidator<UniqueDomain, 
 		Optional<School> existingSchool = schoolRepository.findByDomain(domainToCheck);
 
 		if (existingSchool.isPresent()) {
-			// Duplicate Found: If the ID of the found school is DIFFERENT from the school being validated, it's a conflict.
+			// Duplicate Found: If the ID of the found school is DIFFERENT from the school
+			// being validated, it's a conflict.
 			// (This allows you to "Update" School #1 without changing its domain)
 			if (!existingSchool.get().getId().equals(school.getId())) {
 
-				// This block moves the error from the "Class" level to the specific "domain" field
+				// This block moves the error from the "Class" level to the specific
+				// "domain" field
 				// so it appears next to the input box in your form.
 				context.disableDefaultConstraintViolation();
 				context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
@@ -54,4 +56,5 @@ public class UniqueDomainValidator implements ConstraintValidator<UniqueDomain, 
 
 		return true;
 	}
+
 }

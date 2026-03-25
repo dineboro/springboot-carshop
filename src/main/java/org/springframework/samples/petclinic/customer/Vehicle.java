@@ -63,7 +63,9 @@ public class Vehicle {
 	private LocalDateTime deletedAt;
 
 	public enum VehicleStatus {
+
 		ACTIVE, IN_SERVICE, RETIRED
+
 	}
 
 }
