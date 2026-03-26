@@ -43,3 +43,17 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/petclinic:v${{ github.run_number }}
+      # 7. Log in to Azure
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 8. Tell Azure to pull the new image
+      - name: Update Azure Container App
+        run: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az containerapp update \
+            --name petclinic \
+            --resource-group petclinic-rg \
+            --image ${{ secrets.DOCKERHUB_USERNAME }}/petclinic:v${{ github.run_number }}

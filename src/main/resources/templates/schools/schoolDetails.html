@@ -4,17 +4,85 @@
 
 <body>
 
-<h2 class="text-center">Welcome to <span th:text="${school.name}">School Name</span></h2>
-
 <div class="container mt-4">
 
-  <div class="alert alert-info">
-    <h4 class="alert-heading">Coming Soon!</h4>
-    <p>Upcoming leagues, intramural events, and registration for
-      <strong th:text="${school.name}">this school</strong> will appear here shortly.
-    </p>
+  <div class="mb-4 pb-2 border-bottom">
+    <h1><span th:text="${school.name}">School Name</span> Intramurals</h1>
   </div>
 
+  <div class="row">
+
+    <div class="col-lg-9 mb-4">
+
+      <div class="card shadow-sm h-100">
+        <div class="card-body text-center text-muted p-5">
+          <i class="fa fa-calendar-alt fa-3x mb-3"></i>
+          <h3>Upcoming Leagues & Events</h3>
+          <p>Registration and league schedules will appear here soon!</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-lg-3">
+
+      <div th:if="${currentUser != null}" class="card shadow-sm border-primary">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">My Player Card</h5>
+          <a th:href="@{/users/profile}" class="btn btn-sm btn-light">Edit</a>
+        </div>
+
+        <div class="card-body">
+          <th:block th:if="${!#strings.isEmpty(currentUser.firstName) or !#strings.isEmpty(currentUser.nickname)}">
+
+            <h5 class="card-title text-primary">
+
+              <span th:if="${!#strings.isEmpty(currentUser.nickname)}"
+                    th:text="${currentUser.nickname}">Nickname</span>
+
+              <span th:if="${#strings.isEmpty(currentUser.nickname)}"
+                    th:text="${currentUser.firstName + (!#strings.isEmpty(currentUser.lastName) ? ' ' + currentUser.lastName : '')}">First Last</span>
+
+            </h5>
+
+            <hr>
+          </th:block>
+
+          <div class="mb-3 text-sm">
+            <strong>Email:</strong> <br>
+            <span th:text="${currentUser.email}">student@school.edu</span>
+            <span th:if="${currentUser.publicEmail}" class="badge bg-success float-end">Public</span>
+          </div>
+
+          <div class="mb-3 text-sm" th:if="${currentUser.phone}">
+            <strong>Phone:</strong> <br>
+            <span th:text="${currentUser.phone}">(319) 555-0199</span>
+            <span th:if="${currentUser.publicPhone}" class="badge bg-success float-end">Public</span>
+          </div>
+
+          <div class="text-sm">
+            <strong>Language:</strong>
+            <span th:switch="${currentUser.preferredLanguage}">
+                            <span th:case="'EN'">English</span>
+                            <span th:case="'ES'">Spanish</span>
+                            <span th:case="'KO'">Korean</span>
+                            <span th:case="*">Not specified</span>
+                        </span>
+          </div>
+        </div>
+      </div>
+
+      <div th:unless="${currentUser != null}" class="card shadow-sm">
+        <div class="card-body text-center">
+          <h5 class="card-title">Join the Action</h5>
+          <p class="card-text text-sm">Log in or register to join teams and view your player stats.</p>
+          <a th:href="@{/login}" class="btn btn-primary w-100 mb-2">Log In</a>
+          <a th:href="@{/register-student}" class="btn btn-outline-secondary w-100">Register</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 </body>

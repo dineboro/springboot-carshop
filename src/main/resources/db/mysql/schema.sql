@@ -140,3 +140,31 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   deleted_at DATETIME,
   UNIQUE KEY uk_subscription_name (name)
   )engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS customer (
+  customer_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  customer_name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  email VARCHAR(255),
+  status ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED') DEFAULT 'ACTIVE',
+  created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at DATETIME DEFAULT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS vehicle (
+  vin VARCHAR(17) NOT NULL PRIMARY KEY,
+  customer_id INT,
+  make VARCHAR(255) NOT NULL,
+  model VARCHAR(255) NOT NULL,
+  model_year INT NOT NULL,
+  color VARCHAR(100),
+  license_plate VARCHAR(50),
+  current_mileage INT,
+  status ENUM('ACTIVE', 'IN_SERVICE', 'RETIRED') DEFAULT 'ACTIVE',
+  created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  deleted_at DATETIME DEFAULT NULL,
+  FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE SET NULL
+) engine=InnoDB;
