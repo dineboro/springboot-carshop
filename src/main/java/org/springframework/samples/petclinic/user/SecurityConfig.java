@@ -38,19 +38,23 @@ public class SecurityConfig {
 				.permitAll()
 
 				// Public pages anyone can see
-				.requestMatchers("/", "/schools/**", "/register-student", "/css/**", "/images/**").permitAll()
+				.requestMatchers("/", "/schools/**", "/register-student", "/css/**", "/images/**", "/recipes/**",
+						"/recipes/new")
+				.permitAll()
 
-				// ADD THIS LINE: Require login for the profile and any other user settings
-				.requestMatchers("/users/profile", "/users/delete").authenticated()
+				// ADD THIS LINE: Require login for the profile and any other user
+				// settings
+				.requestMatchers("/users/profile", "/users/delete")
+				.authenticated()
 
 				// Allow POST for registration, login, and creating new subscriptions
-				.requestMatchers("/register-student",
-									"/register",
-									"/login",
-									"/schools/new",
-									"/owners/new",
-									"/subscriptions/new")
+				.requestMatchers("/register-student", "/register", "/login", "/schools/new", "/owners/new",
+						"/subscriptions/new")
 				.permitAll()
+
+				// Require login for shop management features
+				.requestMatchers("/appointments/**", "/vehicles/**", "/employees/**")
+				.authenticated()
 
 				// Protect all other requests
 				.anyRequest()

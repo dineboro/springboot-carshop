@@ -68,10 +68,11 @@
         <span class="fa fa-search"></span>
         <span th:text="#{button.search}">Search</span>
       </button>
-      <a class="btn btn-secondary" th:href="@{/customers}">
+      <button type="button" class="btn btn-secondary"
+              onclick="window.location.href='/customers'">
         <span class="fa fa-list"></span>
         View All Customers
-      </a>
+      </button>
     </div>
   </div>
 </form>
@@ -95,14 +96,16 @@
       <span class="fa fa-lightbulb-o"></span> Quick Actions
     </h5>
     <div class="btn-group" role="group">
-      <a class="btn btn-success" th:href="@{/customers/new}">
+      <button type="button" class="btn btn-success"
+              onclick="window.location.href='/customers/new'">
         <span class="fa fa-plus"></span>
         <span th:text="#{addCustomer}">Add New Customer</span>
-      </a>
-      <a class="btn btn-info" th:href="@{/customers}">
+      </button>
+      <button type="button" class="btn btn-info"
+              onclick="window.location.href='/customers'">
         <span class="fa fa-list"></span>
         View All Customers
-      </a>
+      </button>
     </div>
   </div>
 </div>

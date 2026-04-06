@@ -97,6 +97,16 @@
           <span class="fa fa-users" aria-hidden="true"></span>
           <span th:text="#{findCustomers}">Find customers</span>
         </li>
+
+        <li th:replace="~{::menuItem ('/appointments','appointments','service appointments','calendar','Appointments')}">
+          <span class="fa fa-calendar" aria-hidden="true"></span>
+          <span>Appointments</span>
+        </li>
+
+        <li th:replace="~{::menuItem ('/employees','employees','team members','wrench','Team')}">
+          <span class="fa fa-wrench" aria-hidden="true"></span>
+          <span>Team</span>
+        </li>
         <!-- ADMIN ONLY - Pending Approvals -->
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
           <a th:class="${menu == 'admin' ? 'nav-link active' : 'nav-link'}"
@@ -150,9 +160,11 @@
         </li>
 
         <li class="nav-item" sec:authorize="isAuthenticated()">
-          <a class="nav-link" th:href="@{/users/profile}"
+          <a class="nav-link d-flex align-items-center gap-2" th:href="@{/users/profile}"
              th:classappend="${menu == 'profile' ? 'active' : ''}">
-            <span class="fa fa-user"></span>
+            <img th:if="${navGravatarUrl != null}" th:src="${navGravatarUrl}" alt="Avatar"
+                 class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;">
+            <span th:if="${navGravatarUrl == null}" class="fa fa-user"></span>
             <span th:text="#{editProfile}">Edit Profile</span>
           </a>
         </li>

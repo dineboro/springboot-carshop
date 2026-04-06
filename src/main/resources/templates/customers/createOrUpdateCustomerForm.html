@@ -106,10 +106,11 @@
         <span class="fa" th:classappend="${customer.customerId == null} ? 'fa-plus' : 'fa-save'"></span>
         <span th:text="${customer.customerId == null} ? #{button.add} : #{button.update}">Submit</span>
       </button>
-      <a class="btn btn-secondary" th:href="@{/customers}">
+      <button type="button" class="btn btn-secondary"
+              th:onclick="|window.location.href='@{/customers}'|">
         <span class="fa fa-times"></span>
         <span th:text="#{button.cancel}">Cancel</span>
-      </a>
+      </button>
     </div>
   </div>
 </form>

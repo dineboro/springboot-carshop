@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'employees')}">
+<body>
+
+<h2>
+  <span class="fa fa-user"></span>
+  <span th:text="${employee.employeeId == null} ? 'Add Team Member' : 'Edit Team Member'">Employee Form</span>
+</h2>
+
+<form th:action="${employee.employeeId == null} ? @{/employees/new} : @{/employees/{id}/edit(id=${employee.employeeId})}"
+      th:object="${employee}" method="post">
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" th:field="*{firstName}" maxlength="50" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">Error</div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" th:field="*{lastName}" maxlength="50" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Error</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{role}" required>
+        <option value="">-- Select a role --</option>
+        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">Role</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">Error</div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Status</label>
+      <select class="form-select" th:field="*{status}">
+        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Email</label>
+      <input type="email" class="form-control" th:field="*{email}" maxlength="255" />
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Phone</label>
+      <input type="tel" class="form-control" th:field="*{phone}" maxlength="20" placeholder="e.g., 5551234567" />
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Hire Date</label>
+    <input type="date" class="form-control" th:field="*{hiredDate}" style="max-width: 220px;" />
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      <span class="fa" th:classappend="${employee.employeeId == null} ? 'fa-plus' : 'fa-save'"></span>
+      <span th:text="${employee.employeeId == null} ? 'Add Member' : 'Save Changes'">Submit</span>
+    </button>
+    <button type="button" class="btn btn-secondary"
+            th:onclick="|window.location.href='@{/employees}'|">
+      <span class="fa fa-times"></span> Cancel
+    </button>
+  </div>
+
+</form>
+
+</body>
+</html>

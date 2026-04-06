@@ -44,11 +44,12 @@ class AuthControllerTest {
 
 	/*
 	 * WHY THIS BEAN IS HERE:
+	 *
 	 * @WebMvcTest loads the full Spring Security filter chain. That chain calls
-	 * UserDetailsService to validate sessions on every incoming request. Without
-	 * this mock bean, every test throws NoSuchBeanDefinitionException at startup
-	 * before a single controller method is reached. We don't configure any
-	 * behaviour on it — just registering it is enough to satisfy the filter chain.
+	 * UserDetailsService to validate sessions on every incoming request. Without this
+	 * mock bean, every test throws NoSuchBeanDefinitionException at startup before a
+	 * single controller method is reached. We don't configure any behaviour on it — just
+	 * registering it is enough to satisfy the filter chain.
 	 */
 	@MockitoBean
 	private UserDetailsServiceImpl userDetailsService;
@@ -79,8 +80,8 @@ class AuthControllerTest {
 
 		// User registers with SUBDOMAIN
 		mockMvc.perform(post("/register-student").with(csrf())
-				.param("email", "alex@student.kirkwood.edu") // <--- Subdomain input
-				.param("password", "StrongPass1!"))
+			.param("email", "alex@student.kirkwood.edu") // <--- Subdomain input
+			.param("password", "StrongPass1!"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/schools/kirkwood")); // Should still find ID 1
 	}
@@ -140,9 +141,9 @@ class AuthControllerTest {
 	// =========================================================================
 
 	/*
-	 * Verifies the controller returns the correct template name and adds an
-	 * empty User to the model. Without the model attribute, Thymeleaf's
-	 * th:object="${user}" would throw a NullPointerException at render time.
+	 * Verifies the controller returns the correct template name and adds an empty User to
+	 * the model. Without the model attribute, Thymeleaf's th:object="${user}" would throw
+	 * a NullPointerException at render time.
 	 */
 	@Test
 	void testShowRegisterPage_ReturnsFormWithEmptyUser() throws Exception {
@@ -157,50 +158,52 @@ class AuthControllerTest {
 	// =========================================================================
 
 	/*
-	 * Happy path: all fields pass Bean Validation, service saves successfully.
-	 * Controller should redirect to /login with a flash success message.
+	 * Happy path: all fields pass Bean Validation, service saves successfully. Controller
+	 * should redirect to /login with a flash success message.
 	 *
-	 * WHY csrf(): Spring Security requires a CSRF token on every POST request.
-	 * Without it the filter returns 403 before the controller is ever reached.
+	 * WHY csrf(): Spring Security requires a CSRF token on every POST request. Without it
+	 * the filter returns 403 before the controller is ever reached.
 	 */
 	@Test
 	void testProcessUserRegister_WithValidData_RedirectsToLogin() throws Exception {
 		given(userService.registerNewUser(any(User.class))).willReturn(new User());
 
-		mockMvc.perform(post("/register").with(csrf())
+		mockMvc
+			.perform(post("/register").with(csrf())
 				.param("firstName", "Jane")
-				.param("lastName",  "Doe")
-				.param("email",     "jane@carrepair.com")
-				.param("password",  "SecurePass1"))
+				.param("lastName", "Doe")
+				.param("email", "jane@carrepair.com")
+				.param("password", "SecurePass1"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/login"))
 			.andExpect(flash().attributeExists("messageSuccess"));
 	}
 
 	// =========================================================================
-	// POST /register — blank email  (custom error messages)
+	// POST /register — blank email (custom error messages)
 	// =========================================================================
 
 	/*
-	 * Blank email violates @NotEmpty on User.java.
-	 * BindingResult captures the violation, the controller re-renders the form
-	 * (status 200, not a redirect), and the model reports a field error on "email".
-	 * The service must NOT be called — no point persisting invalid data.
+	 * Blank email violates @NotEmpty on User.java. BindingResult captures the violation,
+	 * the controller re-renders the form (status 200, not a redirect), and the model
+	 * reports a field error on "email". The service must NOT be called — no point
+	 * persisting invalid data.
 	 */
 	@Test
 	void testProcessUserRegister_WithBlankEmail_ReturnsFormWithError() throws Exception {
-		mockMvc.perform(post("/register").with(csrf())
+		mockMvc
+			.perform(post("/register").with(csrf())
 				.param("firstName", "Jane")
-				.param("lastName",  "Doe")
-				.param("email",     "")            // violates @NotEmpty
-				.param("password",  "SecurePass1"))
+				.param("lastName", "Doe")
+				.param("email", "") // violates @NotEmpty
+				.param("password", "SecurePass1"))
 			.andExpect(status().isOk())
 			.andExpect(view().name("auth/register"))
 			.andExpect(model().attributeHasFieldErrors("user", "email"));
 	}
 
 	// =========================================================================
-	// POST /register — weak password  (custom error messages)
+	// POST /register — weak password (custom error messages)
 	// =========================================================================
 
 	/*
@@ -209,48 +212,49 @@ class AuthControllerTest {
 	 */
 	@Test
 	void testProcessUserRegister_WithWeakPassword_ReturnsFormWithError() throws Exception {
-		mockMvc.perform(post("/register").with(csrf())
+		mockMvc
+			.perform(post("/register").with(csrf())
 				.param("firstName", "Jane")
-				.param("lastName",  "Doe")
-				.param("email",     "jane@carrepair.com")
-				.param("password",  "abc"))         // violates @Size and @Pattern
+				.param("lastName", "Doe")
+				.param("email", "jane@carrepair.com")
+				.param("password", "abc")) // violates @Size and @Pattern
 			.andExpect(status().isOk())
 			.andExpect(view().name("auth/register"))
 			.andExpect(model().attributeHasFieldErrors("user", "password"));
 	}
 
 	// =========================================================================
-	// POST /register — duplicate email  (custom error messages)
+	// POST /register — duplicate email (custom error messages)
 	// =========================================================================
 
 	/*
-	 * The service throws RuntimeException on a duplicate email.
-	 * The controller catches it, calls result.rejectValue("email", ...) to add
-	 * a field-level error, then re-renders the form — not a redirect.
+	 * The service throws RuntimeException on a duplicate email. The controller catches
+	 * it, calls result.rejectValue("email", ...) to add a field-level error, then
+	 * re-renders the form — not a redirect.
 	 */
 	@Test
 	void testProcessUserRegister_WithDuplicateEmail_ReturnsFormWithEmailError() throws Exception {
-		given(userService.registerNewUser(any(User.class)))
-			.willThrow(new RuntimeException("Duplicate email"));
+		given(userService.registerNewUser(any(User.class))).willThrow(new RuntimeException("Duplicate email"));
 
-		mockMvc.perform(post("/register").with(csrf())
+		mockMvc
+			.perform(post("/register").with(csrf())
 				.param("firstName", "Jane")
-				.param("lastName",  "Doe")
-				.param("email",     "existing@carrepair.com")
-				.param("password",  "SecurePass1"))
+				.param("lastName", "Doe")
+				.param("email", "existing@carrepair.com")
+				.param("password", "SecurePass1"))
 			.andExpect(status().isOk())
 			.andExpect(view().name("auth/register"))
 			.andExpect(model().attributeHasFieldErrors("user", "email"));
 	}
 
 	// =========================================================================
-	// GET /login — ?logout param  (requirement)
+	// GET /login — ?logout param (requirement)
 	// =========================================================================
 
 	/*
 	 * After clicking Logout, SecurityConfig's logoutSuccessUrl redirects to
-	 * /login?logout. The controller renders auth/login as normal — the template
-	 * checks th:if="${param.logout}" to show the "logged out" confirmation message.
+	 * /login?logout. The controller renders auth/login as normal — the template checks
+	 * th:if="${param.logout}" to show the "logged out" confirmation message.
 	 */
 	@Test
 	void testLoginPage_WithLogoutParam_RendersLoginView() throws Exception {
@@ -266,8 +270,8 @@ class AuthControllerTest {
 
 	/*
 	 * SecurityConfig's failureHandler redirects to /login?disabled when
-	 * UserDetailsServiceImpl throws DisabledException (account pending approval).
-	 * The template checks th:if="${param.disabled}" to show the warning message.
+	 * UserDetailsServiceImpl throws DisabledException (account pending approval). The
+	 * template checks th:if="${param.disabled}" to show the warning message.
 	 */
 	@Test
 	void testLoginPage_WithDisabledParam_RendersLoginView() throws Exception {

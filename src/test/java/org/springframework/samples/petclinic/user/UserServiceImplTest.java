@@ -32,6 +32,7 @@ class UserServiceImplTest {
 	private UserServiceImpl userService;
 
 	private User testUser;
+
 	private Role studentRole;
 
 	@BeforeEach
@@ -45,9 +46,9 @@ class UserServiceImplTest {
 	}
 
 	/*
-	 * RENAME NOTE: The original method was called registerNewUser() but the body
-	 * calls userService.registerNewStudent(). Renamed to registerNewStudent so
-	 * the test name matches what is actually being exercised.
+	 * RENAME NOTE: The original method was called registerNewUser() but the body calls
+	 * userService.registerNewStudent(). Renamed to registerNewStudent so the test name
+	 * matches what is actually being exercised.
 	 */
 	@Test
 	void registerNewStudent() {
@@ -55,7 +56,8 @@ class UserServiceImplTest {
 		// Simulate password hashing: encoder.encode() should return the hashed string
 		when(passwordEncoder.encode(testUser.getPassword())).thenReturn("hashedPassword");
 
-		// Simulate role lookup: roleRepository.findByName() should return the STUDENT role
+		// Simulate role lookup: roleRepository.findByName() should return the STUDENT
+		// role
 		when(roleRepository.findByName("STUDENT")).thenReturn(Optional.of(studentRole));
 
 		// Simulate save: userRepository.save() should return the user object that was
@@ -75,7 +77,8 @@ class UserServiceImplTest {
 		// Check that the STUDENT role was assigned
 		assertTrue(registeredUser.getRoles().contains(studentRole), "User must have the STUDENT role.");
 
-		// --- 4. Verify Mock Interactions (Check the service called its dependencies correctly) ---
+		// --- 4. Verify Mock Interactions (Check the service called its dependencies
+		// correctly) ---
 		// Verify that the encoder was called once
 		verify(passwordEncoder, times(1)).encode("rawPassword");
 
@@ -91,8 +94,8 @@ class UserServiceImplTest {
 	// =========================================================================
 
 	/*
-	 * Staff register through /register. They get NO role assigned at this point
-	 * and isApproved is set to false. An admin must approve them and assign a role
+	 * Staff register through /register. They get NO role assigned at this point and
+	 * isApproved is set to false. An admin must approve them and assign a role
 	 * separately. This is the core business rule for the car repair shop workflow.
 	 */
 	@Test
@@ -109,13 +112,12 @@ class UserServiceImplTest {
 		assertEquals("hashedPassword", result.getPassword(), "Password must be hashed before saving.");
 
 		assertFalse(result.getIsApproved(),
-			"Staff accounts must require admin approval — isApproved must be false after registration.");
+				"Staff accounts must require admin approval — isApproved must be false after registration.");
 
-		assertTrue(result.getIsActive(),
-			"Account should be active so it can be found by the admin approval workflow.");
+		assertTrue(result.getIsActive(), "Account should be active so it can be found by the admin approval workflow.");
 
 		assertTrue(result.getRoles().isEmpty(),
-			"No role should be assigned at registration — admin assigns the role when approving.");
+				"No role should be assigned at registration — admin assigns the role when approving.");
 
 		// Role repository must never be touched during staff registration
 		verifyNoInteractions(roleRepository);
@@ -128,8 +130,8 @@ class UserServiceImplTest {
 
 	/*
 	 * If the STUDENT role was never seeded (e.g. someone truncated the roles table),
-	 * registerNewStudent should throw rather than silently save a user with no role.
-	 * Also verifies the user is NOT saved when role lookup fails.
+	 * registerNewStudent should throw rather than silently save a user with no role. Also
+	 * verifies the user is NOT saved when role lookup fails.
 	 */
 	@Test
 	void registerNewStudent_MissingStudentRole_ThrowsRuntimeException() {
@@ -138,13 +140,10 @@ class UserServiceImplTest {
 		when(roleRepository.findByName("STUDENT")).thenReturn(Optional.empty());
 
 		// Act + Assert
-		RuntimeException ex = assertThrows(
-			RuntimeException.class,
-			() -> userService.registerNewStudent(testUser)
-		);
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.registerNewStudent(testUser));
 
 		assertTrue(ex.getMessage().contains("Student Role Not Found"),
-			"Exception message should tell the developer which role is missing.");
+				"Exception message should tell the developer which role is missing.");
 
 		// User must NOT be persisted if the role lookup failed
 		verify(userRepository, never()).save(any());
@@ -156,17 +155,17 @@ class UserServiceImplTest {
 
 	/*
 	 * After approving a staff member, the admin picks a role (MANAGER, RECEPTIONIST,
-	 * TECHNICIAN). assignRole() finds the user by ID, finds the role by name, adds
-	 * the role to the user's set, and saves.
+	 * TECHNICIAN). assignRole() finds the user by ID, finds the role by name, adds the
+	 * role to the user's set, and saves.
 	 *
-	 * We use ArgumentCaptor to inspect exactly what was passed to save() rather
-	 * than relying on the return value — this is more reliable because it checks
-	 * the actual state of the object that gets persisted.
+	 * We use ArgumentCaptor to inspect exactly what was passed to save() rather than
+	 * relying on the return value — this is more reliable because it checks the actual
+	 * state of the object that gets persisted.
 	 */
 	@Test
 	void assignRole_AddsRoleToUser() {
 		// Arrange
-		testUser.setRoles(new HashSet<>());  // starts with no roles
+		testUser.setRoles(new HashSet<>()); // starts with no roles
 
 		Role managerRole = new Role();
 		managerRole.setId(5);
@@ -184,9 +183,8 @@ class UserServiceImplTest {
 		verify(userRepository).save(captor.capture());
 
 		// Assert the saved user has the MANAGER role
-		assertTrue(captor.getValue().getRoles().stream()
-				.anyMatch(r -> r.getName().equals("MANAGER")),
-			"MANAGER role should have been added to the user before saving.");
+		assertTrue(captor.getValue().getRoles().stream().anyMatch(r -> r.getName().equals("MANAGER")),
+				"MANAGER role should have been added to the user before saving.");
 	}
 
 	// =========================================================================
@@ -194,8 +192,8 @@ class UserServiceImplTest {
 	// =========================================================================
 
 	/*
-	 * If an admin tries to assign a role to a user ID that does not exist
-	 * (deleted between requests), assignRole should throw and NOT call save.
+	 * If an admin tries to assign a role to a user ID that does not exist (deleted
+	 * between requests), assignRole should throw and NOT call save.
 	 */
 	@Test
 	void assignRole_UnknownUserId_ThrowsRuntimeException() {
@@ -203,10 +201,7 @@ class UserServiceImplTest {
 		when(userRepository.findById(999)).thenReturn(Optional.empty());
 
 		// Act + Assert
-		RuntimeException ex = assertThrows(
-			RuntimeException.class,
-			() -> userService.assignRole(999, "ADMIN")
-		);
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.assignRole(999, "ADMIN"));
 
 		assertTrue(ex.getMessage().contains("User not found"));
 		verify(userRepository, never()).save(any());
@@ -217,9 +212,9 @@ class UserServiceImplTest {
 	// =========================================================================
 
 	/*
-	 * If the admin somehow submits a role name that does not exist in the roles
-	 * table (e.g. a typo or a stale dropdown), assignRole should throw and NOT
-	 * save the user with a broken state.
+	 * If the admin somehow submits a role name that does not exist in the roles table
+	 * (e.g. a typo or a stale dropdown), assignRole should throw and NOT save the user
+	 * with a broken state.
 	 */
 	@Test
 	void assignRole_UnknownRoleName_ThrowsRuntimeException() {
@@ -229,13 +224,10 @@ class UserServiceImplTest {
 		when(roleRepository.findByName("TYPO_ROLE")).thenReturn(Optional.empty());
 
 		// Act + Assert
-		RuntimeException ex = assertThrows(
-			RuntimeException.class,
-			() -> userService.assignRole(1, "TYPO_ROLE")
-		);
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> userService.assignRole(1, "TYPO_ROLE"));
 
 		assertTrue(ex.getMessage().contains("TYPO_ROLE"),
-			"Exception should name the missing role so it is easy to debug.");
+				"Exception should name the missing role so it is easy to debug.");
 		verify(userRepository, never()).save(any());
 	}
 
@@ -244,9 +236,9 @@ class UserServiceImplTest {
 	// =========================================================================
 
 	/*
-	 * If a user already has USER role and an admin adds MANAGER, they should end
-	 * up with both roles. A naive implementation that replaces the set instead
-	 * of adding to it would fail this test.
+	 * If a user already has USER role and an admin adds MANAGER, they should end up with
+	 * both roles. A naive implementation that replaces the set instead of adding to it
+	 * would fail this test.
 	 */
 	@Test
 	void assignRole_PreservesExistingRoles() {

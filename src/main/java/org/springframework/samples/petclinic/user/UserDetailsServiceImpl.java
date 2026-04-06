@@ -40,9 +40,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			.stream()
 			.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
 			.collect(Collectors.toList());
-		//5. Block Deleted Account
-		if(user.getDeletedAt()!= null){
-			throw new UsernameNotFoundException("No user found with email '" + email +"'.");
+		// 5. Block Deleted Account
+		if (user.getDeletedAt() != null) {
+			throw new UsernameNotFoundException("No user found with email '" + email + "'.");
 		}
 		// 6. Return UserDetails
 		return org.springframework.security.core.userdetails.User.builder()

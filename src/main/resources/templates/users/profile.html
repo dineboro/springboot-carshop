@@ -6,12 +6,22 @@
 <div class="container mt-4" style="max-width: 700px;">
 
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Edit Profile</h2>
+    <div class="d-flex align-items-center gap-3">
+      <img th:src="${gravatarUrl}" alt="Profile Avatar"
+           class="rounded-circle border"
+           style="width: 72px; height: 72px; object-fit: cover;">
+      <div>
+        <h2 class="mb-0" th:text="${user.firstName != null ? user.firstName : user.email}">User</h2>
+        <small class="text-muted">
+          <a href="https://gravatar.com" target="_blank" rel="noopener">Change avatar on Gravatar</a>
+        </small>
+      </div>
+    </div>
 
     <a th:if="${schoolSlug != null}"
        th:href="@{/schools/{slug}(slug=${schoolSlug})}"
        class="btn btn-outline-primary">
-      <i class="fa fa-arrow-left me-1"></i> Go to My School
+      <i class="fa fa-arrow-left me-1"></i> Go to My Dashboard
     </a>
   </div>
 
@@ -70,19 +80,83 @@
     </div>
   </div>
 
-  <!-- Delete Account block will go here -->
+  <!-- Danger Zone -->
   <div class="card border-danger mb-5">
     <div class="card-body text-danger">
       <h5 class="card-title">Danger Zone</h5>
       <p class="card-text">Once you delete your account, there is no going back. Please be certain.</p>
-
-      <form th:action="@{/users/delete}" method="post" onsubmit="return confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.');">
-        <button type="submit" class="btn btn-outline-danger">Delete Account</button>
-      </form>
+      <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+        Delete Account
+      </button>
     </div>
   </div>
 
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content border-danger">
+      <div class="modal-header border-danger bg-danger-subtle">
+        <h5 class="modal-title text-danger" id="deleteModalLabel">
+          <span class="fa fa-exclamation-triangle me-2"></span>Delete Your Account
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>This action <strong>cannot be undone</strong>. This will permanently delete your account and remove all your data.</p>
+        <p class="mb-1">Please type your email address to confirm:</p>
+        <p class="mb-2"><code th:text="${user.email}">your@email.com</code></p>
+        <input type="text" id="deleteConfirmInput" class="form-control" placeholder="Type your email here" autocomplete="off">
+        <div id="deleteConfirmError" class="text-danger mt-2" style="display: none;">
+          <small><span class="fa fa-times me-1"></span>Email does not match. Please try again.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form th:action="@{/users/delete}" method="post" id="deleteForm" style="display: inline;">
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+            I understand, delete my account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  (function () {
+    var expectedEmail = /*[[${user.email}]]*/ '';
+    var input = document.getElementById('deleteConfirmInput');
+    var confirmBtn = document.getElementById('confirmDeleteBtn');
+    var errorMsg = document.getElementById('deleteConfirmError');
+
+    input.addEventListener('input', function () {
+      if (input.value === expectedEmail) {
+        confirmBtn.disabled = false;
+        errorMsg.style.display = 'none';
+      } else {
+        confirmBtn.disabled = true;
+      }
+    });
+
+    confirmBtn.addEventListener('click', function () {
+      if (input.value === expectedEmail) {
+        document.getElementById('deleteForm').submit();
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    });
+
+    document.getElementById('deleteModal').addEventListener('hidden.bs.modal', function () {
+      input.value = '';
+      confirmBtn.disabled = true;
+      errorMsg.style.display = 'none';
+    });
+  })();
+  /*]]>*/
+</script>
 
 </body>
 </html>

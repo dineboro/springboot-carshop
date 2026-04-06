@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'employees')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-user"></span> <span th:text="${employee.fullName}">Employee Name</span></h2>
+  <div>
+    <button type="button" class="btn btn-secondary"
+            onclick="window.location.href='/employees'">
+      <span class="fa fa-arrow-left"></span> Back to Team
+    </button>
+    <button type="button" class="btn btn-primary ms-2"
+            th:onclick="|window.location.href='@{/employees/{id}/edit(id=${employee.employeeId})}'|">
+      <span class="fa fa-edit"></span> Edit
+    </button>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <table class="table table-borderless mb-0">
+      <tr>
+        <th style="width: 160px;">Name</th>
+        <td th:text="${employee.fullName}">John Doe</td>
+      </tr>
+      <tr>
+        <th>Role</th>
+        <td>
+          <span class="badge bg-info text-dark fs-6" th:text="${employee.role}">Technician</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td>
+          <span class="badge fs-6"
+                th:classappend="${employee.status.name() == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                th:text="${employee.status}">ACTIVE</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td>
+          <a th:if="${employee.email != null}" th:href="'mailto:' + ${employee.email}" th:text="${employee.email}">email</a>
+          <span th:if="${employee.email == null}" class="text-muted">Not provided</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Phone</th>
+        <td>
+          <a th:if="${employee.phone != null}" th:href="'tel:' + ${employee.phone}" th:text="${employee.phone}">phone</a>
+          <span th:if="${employee.phone == null}" class="text-muted">Not provided</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Hired Date</th>
+        <td th:text="${employee.hiredDate != null ? #temporals.format(employee.hiredDate, 'MMMM d, yyyy') : '—'}">January 1, 2024</td>
+      </tr>
+      <tr>
+        <th>Member Since</th>
+        <td th:text="${employee.createdDate != null ? #temporals.format(employee.createdDate, 'MMM d, yyyy') : '—'}">Jan 1, 2024</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

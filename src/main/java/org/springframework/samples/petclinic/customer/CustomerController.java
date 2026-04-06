@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.samples.petclinic.appointment.ServiceAppointmentRepository;
 
 import java.util.Map;
 
@@ -19,8 +20,12 @@ public class CustomerController {
 
 	private final CustomerRepository customerRepository;
 
-	public CustomerController(CustomerRepository customerRepository) {
+	private final ServiceAppointmentRepository appointmentRepository;
+
+	public CustomerController(CustomerRepository customerRepository,
+			ServiceAppointmentRepository appointmentRepository) {
 		this.customerRepository = customerRepository;
+		this.appointmentRepository = appointmentRepository;
 	}
 
 	@GetMapping("/customers/new")
@@ -62,6 +67,7 @@ public class CustomerController {
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"Customer with id " + customerId + " not found."));
 		mav.addObject(customer);
+		mav.addObject("appointments", appointmentRepository.findByCustomerId(customerId));
 		return mav;
 	}
 

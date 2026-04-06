@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -27,11 +30,15 @@ import java.util.Map;
 @Controller
 @RequestMapping("/users")
 public class ProfileController {
+
 	private final UserRepository userRepository;
+
 	private final PasswordEncoder passwordEncoder;
+
 	private final UserDetailsService userDetailsService;
 
-	public ProfileController(UserRepository userRepository, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+	public ProfileController(UserRepository userRepository, PasswordEncoder passwordEncoder,
+			UserDetailsService userDetailsService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.userDetailsService = userDetailsService;
@@ -49,8 +56,7 @@ public class ProfileController {
 	@GetMapping("/profile")
 	public String showProfileForm(Model model, Principal principal) {
 		String email = principal.getName();
-		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 		user.setPassword(""); // This will make the password field blank by default
 
 		// Intercept the 10-digit database string and inject a parentheses
@@ -68,39 +74,57 @@ public class ProfileController {
 		model.addAttribute("schoolSlug", slug);
 
 		model.addAttribute("user", user);
+		model.addAttribute("gravatarUrl", computeGravatarUrl(email));
 		return "users/profile";
 	}
 
+	private String computeGravatarUrl(String email) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] hash = md.digest(email.trim().toLowerCase().getBytes(StandardCharsets.UTF_8));
+			StringBuilder sb = new StringBuilder();
+			for (byte b : hash) {
+				sb.append(String.format("%02x", b));
+			}
+			return "https://www.gravatar.com/avatar/" + sb + "?s=100&d=identicon";
+		}
+		catch (NoSuchAlgorithmException e) {
+			return "https://www.gravatar.com/avatar/?d=identicon&s=100";
+		}
+	}
+
 	@PostMapping("/profile")
-	public String updateProfile(@Valid @ModelAttribute("user") User updatedUser,
-								BindingResult result,
-								Principal principal,
-								RedirectAttributes redirectAttributes) {
+	public String updateProfile(@Valid @ModelAttribute("user") User updatedUser, BindingResult result,
+			Principal principal, RedirectAttributes redirectAttributes) {
 		String currentEmail = principal.getName();
-		User currentUser = userRepository.findByEmail(currentEmail).orElseThrow(() -> new RuntimeException("User not found"));
+		User currentUser = userRepository.findByEmail(currentEmail)
+			.orElseThrow(() -> new RuntimeException("User not found"));
 
 		// 1. Is the user trying to change their email?
-		if(!currentEmail.equalsIgnoreCase(updatedUser.getEmail())) {
+		if (!currentEmail.equalsIgnoreCase(updatedUser.getEmail())) {
 			// Does the new email address exist in the database?
-			if(userRepository.existsByEmail(updatedUser.getEmail())) {
+			if (userRepository.existsByEmail(updatedUser.getEmail())) {
 				result.rejectValue("email", "duplicateEmail", "This email is already taken");
 			}
 		}
 
 		// 2. Validate password strength manually
-		// Why? Because the registration validation is required in all cases, wheras this one is not.
+		// Why? Because the registration validation is required in all cases, wheras this
+		// one is not.
 		String newPassword = updatedUser.getPassword();
 		boolean isUpdatingPassword = newPassword != null && !newPassword.trim().isEmpty();
 
 		if (isUpdatingPassword) {
 			if (!newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$")) {
 				// Add this regex check to enforce the character rules
-				result.rejectValue("password", "weakPassword", "Password must be at least 8 characters and must contain uppercase, lowercase, and number");
+				result.rejectValue("password", "weakPassword",
+						"Password must be at least 8 characters and must contain uppercase, lowercase, and number");
 			}
 		}
 
-		if(result.hasErrors()) {
-			return "/users/profile"; // Don't use "redirect", making a GET request will not display errors
+		if (result.hasErrors()) {
+			return "/users/profile"; // Don't use "redirect", making a GET request will
+										// not display errors
 		}
 
 		currentUser.setFirstName(updatedUser.getFirstName());
@@ -110,8 +134,10 @@ public class ProfileController {
 
 		String submittedPhone = updatedUser.getPhone();
 		if (submittedPhone != null && !submittedPhone.trim().isEmpty()) {
-			currentUser.setPhone(submittedPhone.replaceAll("\\D", "")); // Strips all non-numbers
-		} else {
+			currentUser.setPhone(submittedPhone.replaceAll("\\D", "")); // Strips all
+																		// non-numbers
+		}
+		else {
 			currentUser.setPhone(null);
 		}
 
@@ -134,10 +160,8 @@ public class ProfileController {
 			Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
 
 			// Create a new authentication token with the new email
-			Authentication newAuth = new UsernamePasswordAuthenticationToken(
-				newPrincipal,
-				currentAuth.getCredentials(),
-				newPrincipal.getAuthorities());
+			Authentication newAuth = new UsernamePasswordAuthenticationToken(newPrincipal, currentAuth.getCredentials(),
+					newPrincipal.getAuthorities());
 
 			// Replace the old token in the session memory
 			SecurityContextHolder.getContext().setAuthentication(newAuth);
@@ -146,7 +170,7 @@ public class ProfileController {
 		redirectAttributes.addFlashAttribute("messageSuccess", "Your profile has been updated successfully");
 
 		String langCode = currentUser.getPreferredLanguage();
-		if(langCode != null) {
+		if (langCode != null) {
 			return "redirect:/users/profile?lang=" + langCode.toLowerCase();
 		}
 
@@ -154,10 +178,8 @@ public class ProfileController {
 	}
 
 	@PostMapping("/delete")
-	public String deleteAccount(Principal principal,
-								HttpServletRequest request,
-								HttpServletResponse response,
-								RedirectAttributes redirectAttributes) {
+	public String deleteAccount(Principal principal, HttpServletRequest request, HttpServletResponse response,
+			RedirectAttributes redirectAttributes) {
 		// Finding out who is logged in
 		String email = principal.getName();
 		// Get all of their data from the datbaase
@@ -173,9 +195,9 @@ public class ProfileController {
 			new SecurityContextLogoutHandler().logout(request, response, auth);
 		}
 		// Redirect to the homepage with a farewall message
-		redirectAttributes.addFlashAttribute("messageSuccess", "Your account has been successfully deleted. We're sorry to see you go!");
+		redirectAttributes.addFlashAttribute("messageSuccess",
+				"Your account has been successfully deleted. We're sorry to see you go!");
 		return "redirect:/";
 	}
-
 
 }

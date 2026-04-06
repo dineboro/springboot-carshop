@@ -68,8 +68,8 @@ class UserDetailsServiceImplTest {
 
 	/*
 	 * When no user exists for the given email, UserDetailsServiceImpl throws
-	 * UsernameNotFoundException. Spring Security catches this and treats it as
-	 * a failed login — the user sees the "Invalid email or password" message.
+	 * UsernameNotFoundException. Spring Security catches this and treats it as a failed
+	 * login — the user sees the "Invalid email or password" message.
 	 *
 	 * assertThrows() verifies both the exception type and the message content.
 	 */
@@ -79,13 +79,11 @@ class UserDetailsServiceImplTest {
 		when(userRepository.findByEmail("ghost@kirkwood.edu")).thenReturn(Optional.empty());
 
 		// Act + Assert
-		UsernameNotFoundException ex = assertThrows(
-			UsernameNotFoundException.class,
-			() -> userDetailsService.loadUserByUsername("ghost@kirkwood.edu")
-		);
+		UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class,
+				() -> userDetailsService.loadUserByUsername("ghost@kirkwood.edu"));
 
 		assertTrue(ex.getMessage().contains("ghost@kirkwood.edu"),
-			"Exception message should include the email that was not found");
+				"Exception message should include the email that was not found");
 	}
 
 	// =========================================================================
@@ -93,12 +91,12 @@ class UserDetailsServiceImplTest {
 	// =========================================================================
 
 	/*
-	 * Staff register but must wait for admin approval. UserDetailsServiceImpl
-	 * throws DisabledException for unapproved accounts.
+	 * Staff register but must wait for admin approval. UserDetailsServiceImpl throws
+	 * DisabledException for unapproved accounts.
 	 *
 	 * SecurityConfig's failureHandler catches DisabledException specifically and
-	 * redirects to /login?disabled instead of /login?error — that is why it
-	 * must be DisabledException and not a generic AuthenticationException.
+	 * redirects to /login?disabled instead of /login?error — that is why it must be
+	 * DisabledException and not a generic AuthenticationException.
 	 */
 	@Test
 	void loadUserByUsername_UnapprovedAccount_ThrowsDisabledException() {
@@ -107,13 +105,11 @@ class UserDetailsServiceImplTest {
 		when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
 
 		// Act + Assert
-		DisabledException ex = assertThrows(
-			DisabledException.class,
-			() -> userDetailsService.loadUserByUsername(testUser.getEmail())
-		);
+		DisabledException ex = assertThrows(DisabledException.class,
+				() -> userDetailsService.loadUserByUsername(testUser.getEmail()));
 
 		assertTrue(ex.getMessage().contains("pending approval"),
-			"Exception message should mention pending approval so admins can identify the cause");
+				"Exception message should mention pending approval so admins can identify the cause");
 	}
 
 	// =========================================================================
@@ -122,8 +118,8 @@ class UserDetailsServiceImplTest {
 
 	/*
 	 * An admin can deactivate an account without deleting it. The service throws
-	 * DisabledException here too — the same redirect path as unapproved, but with
-	 * a different message so users know why they cannot log in.
+	 * DisabledException here too — the same redirect path as unapproved, but with a
+	 * different message so users know why they cannot log in.
 	 */
 	@Test
 	void loadUserByUsername_DeactivatedAccount_ThrowsDisabledException() {
@@ -132,13 +128,11 @@ class UserDetailsServiceImplTest {
 		when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
 
 		// Act + Assert
-		DisabledException ex = assertThrows(
-			DisabledException.class,
-			() -> userDetailsService.loadUserByUsername(testUser.getEmail())
-		);
+		DisabledException ex = assertThrows(DisabledException.class,
+				() -> userDetailsService.loadUserByUsername(testUser.getEmail()));
 
 		assertTrue(ex.getMessage().contains("deactivated"),
-			"Exception message should say deactivated so it differs from the pending-approval message");
+				"Exception message should say deactivated so it differs from the pending-approval message");
 	}
 
 	// =========================================================================
@@ -146,9 +140,9 @@ class UserDetailsServiceImplTest {
 	// =========================================================================
 
 	/*
-	 * A user could be both TECHNICIAN and MANAGER. All roles must be converted
-	 * to GrantedAuthority objects with the ROLE_ prefix or Spring Security's
-	 * hasRole() / hasAnyRole() checks will silently fail.
+	 * A user could be both TECHNICIAN and MANAGER. All roles must be converted to
+	 * GrantedAuthority objects with the ROLE_ prefix or Spring Security's hasRole() /
+	 * hasAnyRole() checks will silently fail.
 	 */
 	@Test
 	void loadUserByUsername_MultipleRoles_AllRolesInAuthorities() {
@@ -165,10 +159,8 @@ class UserDetailsServiceImplTest {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(testUser.getEmail());
 
 		// Assert — both roles present with correct ROLE_ prefix
-		assertTrue(userDetails.getAuthorities().stream()
-			.anyMatch(a -> a.getAuthority().equals("ROLE_TECHNICIAN")));
-		assertTrue(userDetails.getAuthorities().stream()
-			.anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER")));
+		assertTrue(userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_TECHNICIAN")));
+		assertTrue(userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER")));
 		assertEquals(2, userDetails.getAuthorities().size());
 	}
 

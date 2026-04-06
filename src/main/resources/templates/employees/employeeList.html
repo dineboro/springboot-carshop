@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'employees')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-wrench"></span> Team Members</h2>
+  <button type="button" class="btn btn-success"
+          onclick="window.location.href='/employees/new'">
+    <span class="fa fa-plus"></span> Add Employee
+  </button>
+</div>
+
+<div th:if="${listEmployees != null and !listEmployees.empty}">
+  <table class="table table-striped table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Hired</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="emp : ${listEmployees}">
+      <td>
+        <a th:href="@{/employees/{id}(id=${emp.employeeId})}" th:text="${emp.fullName}">John Doe</a>
+      </td>
+      <td>
+        <span class="badge bg-info text-dark" th:text="${emp.role}">Technician</span>
+      </td>
+      <td>
+        <a th:if="${emp.email != null}" th:href="'mailto:' + ${emp.email}" th:text="${emp.email}">email</a>
+        <span th:if="${emp.email == null}" class="text-muted">—</span>
+      </td>
+      <td>
+        <a th:if="${emp.phone != null}" th:href="'tel:' + ${emp.phone}" th:text="${emp.phone}">phone</a>
+        <span th:if="${emp.phone == null}" class="text-muted">—</span>
+      </td>
+      <td th:text="${emp.hiredDate != null ? #temporals.format(emp.hiredDate, 'MMM d, yyyy') : '—'}">Jan 1, 2024</td>
+      <td>
+        <span class="badge"
+              th:classappend="${emp.status.name() == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+              th:text="${emp.status}">ACTIVE</span>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/employees/{id}/edit(id=${emp.employeeId})}">
+          <span class="fa fa-edit"></span>
+        </a>
+        <form th:action="@{/employees/{id}/delete(id=${emp.employeeId})}" method="post" style="display:inline;"
+              onsubmit="return confirm('Remove ' + this.dataset.name + ' from the team?')"
+              th:data-name="${emp.fullName}">
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <span class="fa fa-trash"></span>
+          </button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <nav th:if="${totalPages > 1}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+        <a class="page-link" th:href="@{/employees(page=${currentPage - 1})}">Previous</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+          th:classappend="${i == currentPage} ? 'active'">
+        <a class="page-link" th:href="@{/employees(page=${i})}" th:text="${i}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+        <a class="page-link" th:href="@{/employees(page=${currentPage + 1})}">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<div th:if="${listEmployees == null or listEmployees.empty}" class="alert alert-info">
+  <span class="fa fa-info-circle"></span>
+  No team members yet. <a th:href="@{/employees/new}">Add the first one.</a>
+</div>
+
+</body>
+</html>

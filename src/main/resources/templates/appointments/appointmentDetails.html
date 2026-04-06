@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-calendar"></span> Appointment Details</h2>
+  <div>
+    <button type="button" class="btn btn-secondary"
+            th:onclick="|window.location.href='@{/customers/{id}(id=${appointment.customerId})}'|">
+      <span class="fa fa-arrow-left"></span> Back to Customer
+    </button>
+    <button type="button" class="btn btn-primary ms-2"
+            th:onclick="|window.location.href='@{/appointments/{id}/edit(id=${appointment.appointmentId})}'|">
+      <span class="fa fa-edit"></span> Edit
+    </button>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <table class="table table-borderless mb-0">
+      <tr>
+        <th style="width: 180px;">Appointment #</th>
+        <td th:text="${appointment.appointmentId}">1</td>
+      </tr>
+      <tr>
+        <th>Date &amp; Time</th>
+        <td th:text="${#temporals.format(appointment.appointmentDate, 'EEEE, MMMM d, yyyy h:mm a')}">Monday, January 1, 2025 10:00 AM</td>
+      </tr>
+      <tr>
+        <th>Customer</th>
+        <td>
+          <a th:href="@{/customers/{id}(id=${appointment.customerId})}"
+             th:text="${appointment.customer != null ? appointment.customer.customerName : appointment.customerId}">Customer</a>
+        </td>
+      </tr>
+      <tr>
+        <th>Vehicle</th>
+        <td>
+          <span th:if="${appointment.vehicle != null}"
+                th:text="${appointment.vehicle.modelYear + ' ' + appointment.vehicle.make + ' ' + appointment.vehicle.model}">2021 Honda Accord</span>
+          <code th:if="${appointment.vehicle == null}" th:text="${appointment.vin}">VIN</code>
+          <small class="text-muted ms-2">
+            (<code th:text="${appointment.vin}">VIN</code>)
+          </small>
+        </td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td>
+          <span class="badge fs-6"
+                th:classappend="${appointment.status.name() == 'Scheduled' ? 'bg-primary' :
+                                (appointment.status.name() == 'In_Progress' ? 'bg-warning text-dark' :
+                                (appointment.status.name() == 'Completed' ? 'bg-success' :
+                                (appointment.status.name() == 'Cancelled' ? 'bg-secondary' : 'bg-danger')))}"
+                th:text="${appointment.status}">Scheduled</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Description</th>
+        <td th:text="${appointment.description != null ? appointment.description : '-'}">Oil change and tire rotation</td>
+      </tr>
+      <tr th:if="${appointment.notes != null and !appointment.notes.blank}">
+        <th>Notes</th>
+        <td th:text="${appointment.notes}">Internal notes</td>
+      </tr>
+      <tr>
+        <th>Created</th>
+        <td th:text="${appointment.createdDate != null ? #temporals.format(appointment.createdDate, 'MMM d, yyyy') : '-'}">Jan 1, 2025</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

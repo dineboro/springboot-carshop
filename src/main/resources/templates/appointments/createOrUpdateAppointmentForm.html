@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
+<body>
+
+<h2>
+  <span class="fa fa-calendar"></span>
+  <span th:text="${appointment.appointmentId == null} ? 'New Appointment' : 'Edit Appointment'">Appointment Form</span>
+</h2>
+
+<div class="card mb-4" th:if="${customer != null}">
+  <div class="card-body bg-light py-2">
+    <span class="fa fa-user me-1"></span>
+    <strong>Customer:</strong>
+    <a th:href="@{/customers/{id}(id=${customer.customerId})}" th:text="${customer.customerName}">Customer Name</a>
+    <span class="text-muted ms-2" th:text="${customer.phone}">555-0000</span>
+  </div>
+</div>
+
+<form th:action="${appointment.appointmentId == null} ? @{/appointments/new} : @{/appointments/{id}/edit(id=${appointment.appointmentId})}"
+      th:object="${appointment}" method="post">
+
+  <!-- Hidden customer ID -->
+  <input type="hidden" th:field="*{customerId}" />
+
+  <!-- Vehicle -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Vehicle <span class="text-danger">*</span></label>
+    <select class="form-select" th:field="*{vin}" required>
+      <option value="">-- Select a vehicle --</option>
+      <option th:each="v : ${vehicles}"
+              th:value="${v.vin}"
+              th:text="${v.modelYear + ' ' + v.make + ' ' + v.model + ' (' + v.vin + ')'}">
+        Vehicle
+      </option>
+    </select>
+    <div class="text-danger small mt-1" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}">Error</div>
+    <div th:if="${vehicles == null or vehicles.empty}" class="text-warning small mt-1">
+      <span class="fa fa-exclamation-triangle"></span>
+      No vehicles on file for this customer.
+      <a th:href="@{/vehicles/new(customerId=${appointment.customerId})}">Add one first.</a>
+    </div>
+  </div>
+
+  <!-- Appointment Date -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Appointment Date &amp; Time <span class="text-danger">*</span></label>
+    <input type="datetime-local" class="form-control"
+           th:field="*{appointmentDate}"
+           required />
+    <div class="text-danger small mt-1" th:if="${#fields.hasErrors('appointmentDate')}" th:errors="*{appointmentDate}">Error</div>
+  </div>
+
+  <!-- Description -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Description</label>
+    <input type="text" class="form-control" th:field="*{description}"
+           placeholder="e.g., Oil change, brake inspection, tire rotation" maxlength="1024" />
+    <div class="text-danger small mt-1" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Error</div>
+  </div>
+
+  <!-- Status (only shown on edit) -->
+  <div class="mb-3" th:if="${appointment.appointmentId != null}">
+    <label class="form-label fw-semibold">Status</label>
+    <select class="form-select" th:field="*{status}">
+      <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+    </select>
+  </div>
+
+  <!-- Notes -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Internal Notes</label>
+    <textarea class="form-control" th:field="*{notes}" rows="3"
+              placeholder="Internal notes visible to staff only"></textarea>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary mt-0">
+      <span class="fa" th:classappend="${appointment.appointmentId == null} ? 'fa-plus' : 'fa-save'"></span>
+      <span th:text="${appointment.appointmentId == null} ? 'Schedule Appointment' : 'Save Changes'">Submit</span>
+    </button>
+    <button type="button" class="btn btn-secondary"
+            th:onclick="|window.location.href='@{/customers/{id}(id=${appointment.customerId})}'|">
+      <span class="fa fa-times"></span> Cancel
+    </button>
+  </div>
+
+</form>
+
+</body>
+</html>

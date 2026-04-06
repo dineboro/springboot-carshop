@@ -168,3 +168,275 @@ CREATE TABLE IF NOT EXISTS vehicle (
   deleted_at DATETIME DEFAULT NULL,
   FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE SET NULL
 ) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS service_appointment (
+  appointment_id INT NOT NULL AUTO_INCREMENT,
+  customer_id INT NOT NULL,
+  vin VARCHAR(17) NOT NULL,
+  appointment_date DATETIME NOT NULL,
+  description VARCHAR(1024) NULL,
+  status ENUM('Scheduled', 'In_Progress', 'Completed', 'Cancelled', 'No_Show') NOT NULL DEFAULT 'Scheduled',
+  notes TEXT NULL,
+  created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (appointment_id),
+  FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE CASCADE,
+  FOREIGN KEY (vin) REFERENCES vehicle(vin) ON DELETE CASCADE,
+  INDEX idx_appointment_customer_id (customer_id),
+  INDEX idx_appointment_vin (vin),
+  INDEX idx_appointment_date (appointment_date),
+  INDEX idx_appointment_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Service appointments';
+
+CREATE TABLE IF NOT EXISTS employee (
+  employee_id INT NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  role ENUM('Technician', 'Service_Advisor', 'Manager', 'Receptionist') NOT NULL,
+  email VARCHAR(255) NULL,
+  phone VARCHAR(20) NULL,
+  hired_date DATE NULL,
+  status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+  created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at DATETIME NULL,
+  PRIMARY KEY (employee_id),
+  INDEX idx_employee_last_name (last_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Shop employees and technicians';
+
+CREATE TABLE IF NOT EXISTS recipes
+(
+  id bigint unsigned auto_increment primary key,
+  recipe_ingredients varchar(255) null,
+  instructions       varchar(255) not null,
+  type               varchar(50)  null,
+  category           varchar(50)  null,
+  dietary_preference varchar(50)  null,
+  internal_notes     varchar(255) not null,
+  constraint id unique (id),
+  constraint internal_notes unique (internal_notes)
+);
+
+-- Payment Table
+CREATE TABLE IF NOT EXISTS payment (
+                       payment_id INT NOT NULL AUTO_INCREMENT,
+                       invoice_id INT NOT NULL,
+                       payment_date DATETIME NOT NULL,
+                       payment_method ENUM('Cash', 'Credit Card', 'Debit Card', 'Check', 'Bank Transfer') NOT NULL,
+                       amount DECIMAL(10,2) NOT NULL,
+                       transaction_id VARCHAR(100) NULL,
+                       received_by INT NOT NULL,
+                       notes VARCHAR(500) NULL,
+                       created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                       PRIMARY KEY (payment_id),
+                       FOREIGN KEY (invoice_id) REFERENCES invoice(invoice_id) ON DELETE CASCADE,
+                       FOREIGN KEY (received_by) REFERENCES users(id) ON DELETE RESTRICT,
+                       INDEX idx_payment_invoice_id (invoice_id),
+                       INDEX idx_payment_date (payment_date),
+                       INDEX idx_payment_received_by (received_by),
+                       CONSTRAINT chk_payment_amount CHECK (amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Payment records';
+
+
+-- Estimate Table
+CREATE TABLE IF NOT EXISTS estimate (
+                        estimate_id INT NOT NULL AUTO_INCREMENT,
+                        estimate_number VARCHAR(50) NOT NULL,
+                        customer_id INT NOT NULL,
+                        vin VARCHAR(17) NOT NULL,
+                        estimate_date DATETIME NOT NULL,
+                        valid_until DATETIME NULL,
+                        description VARCHAR(1024) NULL,
+                        labor_cost DECIMAL(10,2) NOT NULL,
+                        parts_cost DECIMAL(10,2) NOT NULL,
+                        tax_amount DECIMAL(10,2) NOT NULL,
+                        total_estimate DECIMAL(10,2) NOT NULL,
+                        status ENUM('Draft', 'Sent', 'Approved', 'Rejected', 'Expired') NOT NULL,
+                        approved_date DATETIME NULL,
+                        converted_to_appointment BOOLEAN NOT NULL DEFAULT FALSE,
+                        appointment_id INT NULL,
+                        prepared_by INT NOT NULL,
+                        created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+                        PRIMARY KEY (estimate_id),
+                        UNIQUE KEY uk_estimate_estimate_number (estimate_number),
+                        FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE CASCADE,
+                        FOREIGN KEY (vin) REFERENCES vehicle(vin) ON DELETE CASCADE,
+                        FOREIGN KEY (appointment_id) REFERENCES service_appointment(appointment_id) ON DELETE SET NULL,
+                        FOREIGN KEY (prepared_by) REFERENCES users(id) ON DELETE RESTRICT,
+                        INDEX idx_estimate_customer_id (customer_id),
+                        INDEX idx_estimate_vin (vin),
+                        INDEX idx_estimate_status (status),
+                        INDEX idx_estimate_date (estimate_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Service estimates';
+
+
+-- EstimateLineItem Table
+CREATE TABLE IF NOT EXISTS estimate_line_item (
+                                  estimate_line_item_id INT NOT NULL AUTO_INCREMENT,
+                                  estimate_id INT NOT NULL,
+                                  item_type ENUM('Service', 'Part', 'Labor') NOT NULL,
+                                  description VARCHAR(500) NOT NULL,
+                                  quantity DECIMAL(8,2) NOT NULL DEFAULT 1,
+                                  unit_price DECIMAL(10,2) NOT NULL,
+                                  total_price DECIMAL(10,2) NOT NULL,
+                                  notes VARCHAR(500) NULL,
+
+                                  PRIMARY KEY (estimate_line_item_id),
+                                  FOREIGN KEY (estimate_id) REFERENCES estimate(estimate_id) ON DELETE CASCADE,
+                                  INDEX idx_estimate_line_item_estimate_id (estimate_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Estimate line items';
+
+
+-- CustomerCommunication Table
+CREATE TABLE IF NOT EXISTS customer_communication (
+                                      communication_id INT NOT NULL AUTO_INCREMENT,
+                                      customer_id INT NOT NULL,
+                                      appointment_id INT NULL,
+                                      communication_type ENUM('Phone Call', 'Email', 'SMS', 'In Person', 'Other') NOT NULL,
+                                      direction ENUM('Inbound', 'Outbound') NOT NULL,
+                                      subject VARCHAR(256) NULL,
+                                      notes TEXT NULL,
+                                      contacted_by INT NULL,
+                                      communication_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                      follow_up_required BOOLEAN NOT NULL DEFAULT FALSE,
+                                      follow_up_date DATETIME NULL,
+
+                                      PRIMARY KEY (communication_id),
+                                      FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE CASCADE,
+                                      FOREIGN KEY (appointment_id) REFERENCES service_appointment(appointment_id) ON DELETE SET NULL,
+                                      FOREIGN KEY (contacted_by) REFERENCES users(id) ON DELETE SET NULL,
+                                      INDEX idx_communication_customer_id (customer_id),
+                                      INDEX idx_communication_appointment_id (appointment_id),
+                                      INDEX idx_communication_date (communication_date),
+                                      INDEX idx_communication_follow_up (follow_up_required, follow_up_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Customer communication log';
+
+
+-- VehicleServiceHistory Table
+CREATE TABLE IF NOT EXISTS vehicle_service_history (
+                                       service_history_id INT NOT NULL AUTO_INCREMENT,
+                                       vin VARCHAR(17) NOT NULL,
+                                       appointment_id INT NOT NULL,
+                                       service_date DATETIME NOT NULL,
+                                       mileage INT NULL,
+                                       service_summary VARCHAR(1024) NOT NULL,
+                                       total_cost DECIMAL(10,2) NOT NULL,
+                                       performed_by INT NULL,
+                                       created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                                       PRIMARY KEY (service_history_id),
+                                       FOREIGN KEY (vin) REFERENCES vehicle(vin) ON DELETE CASCADE,
+                                       FOREIGN KEY (appointment_id) REFERENCES service_appointment(appointment_id) ON DELETE CASCADE,
+                                       FOREIGN KEY (performed_by) REFERENCES employee(employee_id) ON DELETE SET NULL,
+                                       INDEX idx_service_history_vin (vin),
+                                       INDEX idx_service_history_appointment_id (appointment_id),
+                                       INDEX idx_service_history_date (service_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Complete service history per vehicle (CARFAX-style)';
+
+
+-- PurchaseOrder Table
+CREATE TABLE IF NOT EXISTS purchase_order (
+                              purchase_order_id INT NOT NULL AUTO_INCREMENT,
+                              po_number VARCHAR(50) NOT NULL,
+                              supplier_id INT NOT NULL,
+                              order_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              expected_delivery DATE NULL,
+                              actual_delivery DATE NULL,
+                              status ENUM('Draft', 'Submitted', 'Confirmed', 'Shipped', 'Received', 'Cancelled') NOT NULL,
+                              subtotal DECIMAL(10,2) NOT NULL,
+                              shipping_cost DECIMAL(10,2) NULL DEFAULT 0,
+                              tax DECIMAL(10,2) NULL DEFAULT 0,
+                              total_amount DECIMAL(10,2) NOT NULL,
+                              ordered_by INT NOT NULL,
+                              notes VARCHAR(1024) NULL,
+                              created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              updated_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+                              PRIMARY KEY (purchase_order_id),
+                              UNIQUE KEY uk_purchase_order_po_number (po_number),
+                              FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id) ON DELETE RESTRICT,
+                              FOREIGN KEY (ordered_by) REFERENCES users(id) ON DELETE RESTRICT,
+                              INDEX idx_purchase_order_supplier_id (supplier_id),
+                              INDEX idx_purchase_order_status (status),
+                              INDEX idx_purchase_order_order_date (order_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Purchase orders';
+
+
+-- PurchaseOrderItem Table
+CREATE TABLE IF NOT EXISTS purchase_order_item (
+                                   po_item_id INT NOT NULL AUTO_INCREMENT,
+                                   purchase_order_id INT NOT NULL,
+                                   part_number VARCHAR(100) NOT NULL,
+                                   description VARCHAR(500) NOT NULL,
+                                   quantity_ordered INT NOT NULL,
+                                   quantity_received INT NOT NULL DEFAULT 0,
+                                   unit_cost DECIMAL(10,2) NOT NULL,
+                                   total_cost DECIMAL(10,2) NOT NULL,
+
+                                   PRIMARY KEY (po_item_id),
+                                   FOREIGN KEY (purchase_order_id) REFERENCES purchase_order(purchase_order_id) ON DELETE CASCADE,
+                                   INDEX idx_po_item_purchase_order_id (purchase_order_id),
+                                   INDEX idx_po_item_part_number (part_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Purchase order items';
+
+
+-- AppointmentReminder Table
+CREATE TABLE IF NOT EXISTS appointment_reminder (
+                                    reminder_id INT NOT NULL AUTO_INCREMENT,
+                                    appointment_id INT NOT NULL,
+                                    reminder_type ENUM('Email', 'SMS', 'Phone Call') NOT NULL,
+                                    scheduled_date DATETIME NOT NULL,
+                                    sent_date DATETIME NULL,
+                                    status ENUM('Scheduled', 'Sent', 'Failed', 'Cancelled') NOT NULL,
+                                    message TEXT NULL,
+                                    created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                                    PRIMARY KEY (reminder_id),
+                                    FOREIGN KEY (appointment_id) REFERENCES service_appointment(appointment_id) ON DELETE CASCADE,
+                                    INDEX idx_reminder_appointment_id (appointment_id),
+                                    INDEX idx_reminder_status (status),
+                                    INDEX idx_reminder_scheduled_date (scheduled_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Appointment reminders';
+
+
+-- =====================================================
+-- PART 3: CUSTOMER PORTAL INVITATION SYSTEM
+-- (For future implementation - receptionist invites customers)
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS customer_invitations (
+                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                    customer_id INT NOT NULL,
+                                    email VARCHAR(255) NOT NULL,
+                                    invitation_token VARCHAR(255) NOT NULL UNIQUE,
+                                    invited_by INT NOT NULL COMMENT 'user_id of receptionist who sent invite',
+                                    invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                    expires_at TIMESTAMP NOT NULL,
+                                    is_used BOOLEAN DEFAULT FALSE,
+                                    used_at TIMESTAMP NULL,
+
+                                    FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE CASCADE,
+                                    FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE RESTRICT,
+
+                                    INDEX idx_invitation_token (invitation_token),
+                                    INDEX idx_invitation_customer (customer_id),
+                                    INDEX idx_invitation_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Customer portal registration invitations (future feature)';
+
+
+
+
+

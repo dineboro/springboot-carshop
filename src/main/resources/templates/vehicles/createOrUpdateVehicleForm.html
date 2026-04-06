@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'customers')}">
+<body>
+
+<h2>
+  <span class="fa fa-car"></span>
+  <span th:text="${vehicle.vin == null or vehicle.vin.blank} ? 'Add Vehicle' : 'Edit Vehicle'">Vehicle Form</span>
+</h2>
+
+<div class="card mb-4" th:if="${customer != null}">
+  <div class="card-body bg-light py-2">
+    <span class="fa fa-user me-1"></span>
+    <strong>Customer:</strong>
+    <a th:href="@{/customers/{id}(id=${customer.customerId})}" th:text="${customer.customerName}">Customer Name</a>
+  </div>
+</div>
+
+<form th:action="${vehicle.vin == null or vehicle.vin.blank} ? @{/vehicles/new(customerId=${customer.customerId})} : @{/vehicles/{vin}/edit(vin=${vehicle.vin})}"
+      th:object="${vehicle}" method="post">
+
+  <!-- VIN (read-only on edit) -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">VIN <span class="text-danger">*</span></label>
+    <input type="text" class="form-control"
+           th:field="*{vin}"
+           th:readonly="${vehicle.vin != null and !vehicle.vin.blank}"
+           maxlength="17" minlength="17"
+           placeholder="17-character VIN"
+           style="font-family: monospace; text-transform: uppercase;" />
+    <div class="text-danger small mt-1" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}">Error</div>
+    <small class="text-muted">VIN cannot be changed after creation.</small>
+  </div>
+
+  <div class="row">
+    <!-- Make -->
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Make <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" th:field="*{make}" placeholder="e.g., Honda" maxlength="255" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('make')}" th:errors="*{make}">Error</div>
+    </div>
+
+    <!-- Model -->
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Model <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" th:field="*{model}" placeholder="e.g., Accord" maxlength="255" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('model')}" th:errors="*{model}">Error</div>
+    </div>
+
+    <!-- Year -->
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Year <span class="text-danger">*</span></label>
+      <input type="number" class="form-control" th:field="*{modelYear}"
+             min="1900" max="2026" placeholder="e.g., 2021" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('modelYear')}" th:errors="*{modelYear}">Error</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Color -->
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Color</label>
+      <input type="text" class="form-control" th:field="*{color}" placeholder="e.g., Silver" maxlength="100" />
+    </div>
+
+    <!-- License Plate -->
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">License Plate</label>
+      <input type="text" class="form-control" th:field="*{licensePlate}"
+             placeholder="e.g., ABC-1234" maxlength="50"
+             style="text-transform: uppercase;" />
+    </div>
+
+    <!-- Mileage -->
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Current Mileage</label>
+      <input type="number" class="form-control" th:field="*{currentMileage}"
+             min="0" placeholder="e.g., 45000" />
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Status</label>
+    <select class="form-select" th:field="*{status}">
+      <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+    </select>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary mt-0">
+      <span class="fa" th:classappend="${vehicle.vin == null or vehicle.vin.blank} ? 'fa-plus' : 'fa-save'"></span>
+      <span th:text="${vehicle.vin == null or vehicle.vin.blank} ? 'Add Vehicle' : 'Save Changes'">Submit</span>
+    </button>
+    <button type="button" class="btn btn-secondary "
+            th:onclick="|window.location.href='@{/customers/{id}(id=${customer.customerId})}'|">
+      <span class="fa fa-times"></span> Cancel
+    </button>
+  </div>
+
+</form>
+
+</body>
+</html>

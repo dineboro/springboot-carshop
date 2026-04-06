@@ -51,12 +51,14 @@
 
 <!-- Action Buttons -->
 <div class="btn-group mb-4 gap-4" role="group">
-  <a class="btn btn-primary mt-0" th:href="@{/customers/{id}/edit(id=${customer.customerId})}">
+  <button type="button" class="btn btn-primary mt-0"
+          th:onclick="|window.location.href='@{/customers/{id}/edit(id=${customer.customerId})}'|">
     <span class="fa fa-edit"></span> Edit Customer
-  </a>
-  <a class="btn btn-secondary" th:href="@{/customers}">
+  </button>
+  <button type="button" class="btn btn-secondary"
+          onclick="window.location.href='/customers'">
     <span class="fa fa-arrow-left"></span> Back to List
-  </a>
+  </button>
 </div>
 
 <br/>
@@ -77,6 +79,7 @@
       <th>Color</th>
       <th>Mileage</th>
       <th>Status</th>
+      <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -86,9 +89,20 @@
       <td th:text="${vehicle.model}">Accord</td>
       <td th:text="${vehicle.modelYear}">2020</td>
       <td th:text="${vehicle.color != null ? vehicle.color : '-'}">Silver</td>
-      <td th:text="${vehicle.currentMileage}">45000</td>
+      <td th:text="${vehicle.currentMileage != null ? vehicle.currentMileage : '-'}">45000</td>
       <td>
         <span class="badge badge-success" th:text="${vehicle.status}">ACTIVE</span>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/vehicles/{vin}/edit(vin=${vehicle.vin})}">
+          <span class="fa fa-edit"></span>
+        </a>
+        <form th:action="@{/vehicles/{vin}/delete(vin=${vehicle.vin})}" method="post" style="display:inline;"
+              onsubmit="return confirm('Remove this vehicle?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <span class="fa fa-trash"></span>
+          </button>
+        </form>
       </td>
     </tr>
     </tbody>
@@ -100,9 +114,68 @@
   No vehicles found for this customer.
 </div>
 
-<a class="btn btn-success" th:href="@{/vehicles/new(customerId=${customer.customerId})}">
+<button type="button" class="btn btn-success"
+        th:onclick="|window.location.href='@{/vehicles/new(customerId=${customer.customerId})}'|">
   <span class="fa fa-plus"></span> Add Vehicle
-</a>
+</button>
+
+<br/><br/>
+
+<!-- Appointments Section -->
+<h3>
+  <span class="fa fa-calendar"></span> Service Appointments
+</h3>
+
+<div th:if="${appointments != null and !appointments.empty}">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Date</th>
+      <th>Vehicle</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="appt : ${appointments}">
+      <td th:text="${#temporals.format(appt.appointmentDate, 'MMM d, yyyy h:mm a')}">Jan 1, 2025</td>
+      <td>
+        <span th:if="${appt.vehicle != null}"
+              th:text="${appt.vehicle.make + ' ' + appt.vehicle.model + ' (' + appt.vehicle.modelYear + ')'}">Honda Accord (2021)</span>
+        <code th:if="${appt.vehicle == null}" th:text="${appt.vin}">VIN</code>
+      </td>
+      <td th:text="${appt.description != null ? appt.description : '-'}">Oil change</td>
+      <td>
+        <span class="badge"
+              th:classappend="${appt.status.name() == 'Scheduled' ? 'bg-primary' :
+                              (appt.status.name() == 'In_Progress' ? 'bg-warning text-dark' :
+                              (appt.status.name() == 'Completed' ? 'bg-success' :
+                              (appt.status.name() == 'Cancelled' ? 'bg-secondary' : 'bg-danger')))}"
+              th:text="${appt.status}">Scheduled</span>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-primary" th:href="@{/appointments/{id}(id=${appt.appointmentId})}">
+          <span class="fa fa-eye"></span>
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/appointments/{id}/edit(id=${appt.appointmentId})}">
+          <span class="fa fa-edit"></span>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div th:if="${appointments == null or appointments.empty}" class="alert alert-info">
+  <span class="fa fa-info-circle"></span>
+  No appointments yet for this customer.
+</div>
+
+<button type="button" class="btn btn-success"
+        th:onclick="|window.location.href='@{/appointments/new(customerId=${customer.customerId})}'|">
+  <span class="fa fa-plus"></span> Schedule Appointment
+</button>
 
 </body>
 </html>

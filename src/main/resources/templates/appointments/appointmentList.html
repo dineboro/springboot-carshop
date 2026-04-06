@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
+<body>
+
+<h2><span class="fa fa-calendar"></span> Service Appointments</h2>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <span class="text-muted" th:text="${totalItems} + ' appointment(s) found'">0 appointments found</span>
+  <button type="button" class="btn btn-success"
+          onclick="window.location.href='/customers'">
+    <span class="fa fa-plus"></span> New Appointment
+  </button>
+</div>
+
+<div th:if="${listAppointments != null and !listAppointments.empty}">
+  <table class="table table-striped table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>#</th>
+      <th>Date</th>
+      <th>Customer</th>
+      <th>Vehicle</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="appt : ${listAppointments}">
+      <td th:text="${appt.appointmentId}">1</td>
+      <td th:text="${#temporals.format(appt.appointmentDate, 'MMM d, yyyy h:mm a')}">Jan 1, 2025</td>
+      <td>
+        <a th:if="${appt.customer != null}"
+           th:href="@{/customers/{id}(id=${appt.customerId})}"
+           th:text="${appt.customer.customerName}">Customer Name</a>
+        <span th:if="${appt.customer == null}" th:text="${appt.customerId}">?</span>
+      </td>
+      <td>
+        <span th:if="${appt.vehicle != null}"
+              th:text="${appt.vehicle.make + ' ' + appt.vehicle.model + ' (' + appt.vehicle.modelYear + ')'}">Honda Accord (2021)</span>
+        <code th:if="${appt.vehicle == null}" th:text="${appt.vin}">VIN</code>
+      </td>
+      <td th:text="${appt.description != null ? appt.description : '-'}">Oil change</td>
+      <td>
+        <span class="badge"
+              th:classappend="${appt.status.name() == 'Scheduled' ? 'bg-primary' :
+                              (appt.status.name() == 'In_Progress' ? 'bg-warning text-dark' :
+                              (appt.status.name() == 'Completed' ? 'bg-success' :
+                              (appt.status.name() == 'Cancelled' ? 'bg-secondary' : 'bg-danger')))}"
+              th:text="${appt.status}">Scheduled</span>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-primary" th:href="@{/appointments/{id}(id=${appt.appointmentId})}">
+          <span class="fa fa-eye"></span>
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/appointments/{id}/edit(id=${appt.appointmentId})}">
+          <span class="fa fa-edit"></span>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <nav th:if="${totalPages > 1}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+        <a class="page-link" th:href="@{/appointments(page=${currentPage - 1})}">Previous</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+          th:classappend="${i == currentPage} ? 'active'">
+        <a class="page-link" th:href="@{/appointments(page=${i})}" th:text="${i}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+        <a class="page-link" th:href="@{/appointments(page=${currentPage + 1})}">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<div th:if="${listAppointments == null or listAppointments.empty}" class="alert alert-info">
+  <span class="fa fa-info-circle"></span>
+  No appointments found. Go to a <a th:href="@{/customers}">customer's page</a> to schedule one.
+</div>
+
+</body>
+</html>
