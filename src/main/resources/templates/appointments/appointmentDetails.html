@@ -4,12 +4,12 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2><span class="fa fa-calendar"></span> Appointment Details</h2>
-  <div>
+  <div class="d-flex align-items center">
     <button type="button" class="btn btn-secondary"
             th:onclick="|window.location.href='@{/customers/{id}(id=${appointment.customerId})}'|">
       <span class="fa fa-arrow-left"></span> Back to Customer
     </button>
-    <button type="button" class="btn btn-primary ms-2"
+    <button type="button" class="btn btn-primary ms-4 mt-0"
             th:onclick="|window.location.href='@{/appointments/{id}/edit(id=${appointment.appointmentId})}'|">
       <span class="fa fa-edit"></span> Edit
     </button>
@@ -31,7 +31,7 @@
         <th>Customer</th>
         <td>
           <a th:href="@{/customers/{id}(id=${appointment.customerId})}"
-             th:text="${appointment.customer != null ? appointment.customer.customerName : appointment.customerId}">Customer</a>
+             th:text="${customer != null ? customer.customerName : appointment.customerId}">Customer</a>
         </td>
       </tr>
       <tr>

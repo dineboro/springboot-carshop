@@ -78,7 +78,9 @@ public class ServiceAppointmentController {
 	public String showAppointment(@PathVariable int appointmentId, Model model) {
 		ServiceAppointment appointment = appointmentRepository.findById(appointmentId)
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+		Customer customer = customerRepository.findById(appointment.getCustomerId()).orElse(null);
 		model.addAttribute("appointment", appointment);
+		model.addAttribute("customer", customer);
 		return "appointments/appointmentDetails";
 	}
 
