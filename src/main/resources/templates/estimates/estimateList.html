@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'estimates')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-clipboard"></span> Estimates</h2>
+  <a href="/estimates/new" class="btn btn-success">
+    <span class="fa fa-plus"></span> New Estimate
+  </a>
+</div>
+
+<div th:if="${messageSuccess}" class="alert alert-success alert-dismissible fade show">
+  <span th:text="${messageSuccess}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<form th:action="@{/estimates}" method="get" class="mb-3">
+  <div class="input-group" style="max-width: 400px;">
+    <input type="text" name="search" class="form-control" placeholder="Search by customer name or phone"
+           th:value="${search}">
+    <button class="btn btn-outline-secondary" type="submit">
+      <span class="fa fa-search"></span> Search
+    </button>
+    <a th:if="${search != null and search != ''}" th:href="@{/estimates}" class="btn btn-outline-danger">
+      <span class="fa fa-times"></span>
+    </a>
+  </div>
+</form>
+
+<div th:if="${listEstimates != null and !listEstimates.empty}">
+  <table class="table table-striped table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>Estimate #</th>
+      <th>Customer</th>
+      <th>Vehicle</th>
+      <th>Date</th>
+      <th>Valid Until</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="est : ${listEstimates}">
+      <td>
+        <a th:href="@{/estimates/{id}(id=${est.estimateId})}" th:text="${est.estimateNumber}">EST-00001</a>
+      </td>
+      <td th:text="${est.customer?.customerName ?: '—'}">Customer</td>
+      <td th:text="${est.vin}">VIN</td>
+      <td th:text="${est.estimateDate != null ? #temporals.format(est.estimateDate, 'MMM d, yyyy') : '—'}">Jan 1</td>
+      <td th:text="${est.validUntil != null ? #temporals.format(est.validUntil, 'MMM d, yyyy') : '—'}">Jan 30</td>
+      <td th:text="${'$' + #numbers.formatDecimal(est.totalEstimate, 1, 2)}">$0.00</td>
+      <td>
+        <span class="badge"
+              th:classappend="${est.status.name() == 'Approved' ? 'bg-success' :
+                              (est.status.name() == 'Rejected' or est.status.name() == 'Expired') ? 'bg-danger' :
+                              est.status.name() == 'Sent' ? 'bg-info text-dark' : 'bg-secondary'}"
+              th:text="${est.status}">Draft</span>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-primary" th:href="@{/estimates/{id}(id=${est.estimateId})}">
+          <span class="fa fa-eye"></span>
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/estimates/{id}/edit(id=${est.estimateId})}">
+          <span class="fa fa-edit"></span>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <nav th:if="${totalPages > 1}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+        <a class="page-link" th:href="@{/estimates(page=${currentPage - 1}, search=${search})}">Previous</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+          th:classappend="${i == currentPage} ? 'active'">
+        <a class="page-link" th:href="@{/estimates(page=${i}, search=${search})}" th:text="${i}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+        <a class="page-link" th:href="@{/estimates(page=${currentPage + 1}, search=${search})}">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<div th:if="${listEstimates == null or listEstimates.empty}" class="alert alert-info">
+  <span class="fa fa-info-circle"></span> No estimates yet.
+  <a th:href="@{/estimates/new}">Create one.</a>
+</div>
+
+</body>
+</html>

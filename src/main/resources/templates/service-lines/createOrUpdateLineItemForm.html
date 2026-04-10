@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
+<body>
+
+<h2>
+  <span class="fa fa-plus-circle"></span> Add Line Item
+</h2>
+
+<div class="mb-3">
+  <a th:href="@{/appointments/{id}(id=${appointmentId})}" class="btn btn-sm btn-outline-secondary">
+    <span class="fa fa-arrow-left"></span> Back to Appointment
+  </a>
+</div>
+
+<form th:action="@{/appointments/{aId}/service-lines/{slId}/items/new(aId=${appointmentId},slId=${serviceLineId})}"
+      th:object="${lineItem}" method="post">
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Load from Catalog (optional)</label>
+    <select class="form-select" id="catalogSelect" onchange="fillFromCatalog(this)">
+      <option value="">-- Select from catalog --</option>
+      <option th:each="cat : ${catalogItems}"
+              th:value="${cat.catalogId}"
+              th:text="${cat.name}"
+              th:data-price="${cat.defaultPrice}"
+              th:data-desc="${cat.description}">Service</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Item Type <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{itemType}" required>
+        <option value="">-- Select type --</option>
+        <option th:each="t : ${itemTypes}" th:value="${t}" th:text="${t}">Type</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('itemType')}" th:errors="*{itemType}">Error</div>
+    </div>
+    <div class="col-md-8 mb-3">
+      <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" th:field="*{description}" id="descField" maxlength="500" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Error</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
+      <input type="number" class="form-control" th:field="*{quantity}" id="qtyField" step="0.01" min="0.01" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Unit Price ($) <span class="text-danger">*</span></label>
+      <input type="number" class="form-control" th:field="*{unitPrice}" id="priceField" step="0.01" min="0"
+             onchange="calcTotal()" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('unitPrice')}" th:errors="*{unitPrice}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Total Price ($) <span class="text-danger">*</span></label>
+      <input type="number" class="form-control" th:field="*{totalPrice}" id="totalField" step="0.01" min="0" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('totalPrice')}" th:errors="*{totalPrice}">Error</div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Notes</label>
+    <input type="text" class="form-control" th:field="*{notes}" maxlength="500" />
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      <span class="fa fa-plus"></span> Add Item
+    </button>
+    <a th:href="@{/appointments/{id}(id=${appointmentId})}" class="btn btn-secondary">
+      <span class="fa fa-times"></span> Cancel
+    </a>
+  </div>
+
+</form>
+
+<script>
+  function fillFromCatalog(select) {
+    const opt = select.options[select.selectedIndex];
+    if (opt.value) {
+      document.getElementById('descField').value = opt.dataset.desc || opt.text;
+      document.getElementById('priceField').value = opt.dataset.price || '';
+      calcTotal();
+    }
+  }
+  function calcTotal() {
+    const qty = parseFloat(document.getElementById('qtyField').value) || 0;
+    const price = parseFloat(document.getElementById('priceField').value) || 0;
+    document.getElementById('totalField').value = (qty * price).toFixed(2);
+  }
+</script>
+
+</body>
+</html>

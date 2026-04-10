@@ -29,11 +29,33 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorize -> authorize
-				// FIXED: Protect admin pages BEFORE allowing all GET requests
+				// Admin only
 				.requestMatchers("/admin/**")
-				.hasRole("ADMIN") // Admin only (GET and POST)
+				.hasRole("ADMIN")
 
-				// Allow all other GET requests (for viewing pages)
+				// Customer create/edit — MANAGER and RECEPTIONIST only
+				.requestMatchers(HttpMethod.GET, "/customers/new", "/customers/*/edit")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
+				.requestMatchers(HttpMethod.POST, "/customers/new", "/customers/*/edit")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
+
+				// Vehicle create/edit/delete — MANAGER and RECEPTIONIST only
+				.requestMatchers(HttpMethod.GET, "/vehicles/new", "/vehicles/*/edit")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
+				.requestMatchers(HttpMethod.POST, "/vehicles/new", "/vehicles/*/edit", "/vehicles/*/delete")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
+
+				// Appointment create/edit — MANAGER and RECEPTIONIST only
+				.requestMatchers(HttpMethod.GET, "/appointments/new", "/appointments/*/edit")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
+				.requestMatchers(HttpMethod.POST, "/appointments/new", "/appointments/*/edit")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
+
+				// Appointment status/notes update — TECHNICIAN, MANAGER, RECEPTIONIST
+				.requestMatchers("/appointments/*/status")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST", "TECHNICIAN")
+
+				// Allow all other GET requests (view/read pages)
 				.requestMatchers(HttpMethod.GET)
 				.permitAll()
 
@@ -42,8 +64,7 @@ public class SecurityConfig {
 						"/recipes/new")
 				.permitAll()
 
-				// ADD THIS LINE: Require login for the profile and any other user
-				// settings
+				// Require login for the profile and any other user settings
 				.requestMatchers("/users/profile", "/users/delete")
 				.authenticated()
 
@@ -52,8 +73,39 @@ public class SecurityConfig {
 						"/subscriptions/new")
 				.permitAll()
 
+				// Service catalog — managers/admins manage, others read-only
+				.requestMatchers(HttpMethod.POST, "/service-catalog/**")
+				.hasAnyRole("ADMIN", "MANAGER")
+				.requestMatchers(HttpMethod.GET, "/service-catalog/new")
+				.hasAnyRole("ADMIN", "MANAGER")
+
+				// Invoices — managers and service advisors
+				.requestMatchers(HttpMethod.POST, "/invoices/**")
+				.hasAnyRole("ADMIN", "MANAGER", "SERVICE_ADVISOR", "RECEPTIONIST")
+
+				// Estimates — managers and service advisors
+				.requestMatchers(HttpMethod.POST, "/estimates/**")
+				.hasAnyRole("ADMIN", "MANAGER", "SERVICE_ADVISOR", "RECEPTIONIST")
+
+				// Service lines — managers, service advisors, technicians
+				.requestMatchers(HttpMethod.POST, "/appointments/*/service-lines/**")
+				.hasAnyRole("ADMIN", "MANAGER", "SERVICE_ADVISOR", "TECHNICIAN")
+
+				// Reminders — managers and receptionists
+				.requestMatchers(HttpMethod.POST, "/appointments/*/reminders/**")
+				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
+
+				// Communications — all staff
+				.requestMatchers(HttpMethod.POST, "/communications/**")
+				.authenticated()
+
+				// Service history — managers, technicians
+				.requestMatchers(HttpMethod.POST, "/service-history/**")
+				.hasAnyRole("ADMIN", "MANAGER", "TECHNICIAN")
+
 				// Require login for shop management features
-				.requestMatchers("/appointments/**", "/vehicles/**", "/employees/**")
+				.requestMatchers("/appointments/**", "/vehicles/**", "/employees/**", "/service-catalog/**",
+						"/invoices/**", "/estimates/**", "/communications/**", "/service-history/**")
 				.authenticated()
 
 				// Protect all other requests

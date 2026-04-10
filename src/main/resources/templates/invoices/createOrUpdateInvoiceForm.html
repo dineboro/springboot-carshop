@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'invoices')}">
+<body>
+
+<h2>
+  <span class="fa fa-file-text"></span>
+  <span th:text="${invoice.invoiceId == null} ? 'New Invoice' : 'Edit Invoice'">Invoice Form</span>
+</h2>
+
+<form th:action="${invoice.invoiceId == null} ? @{/invoices/new} : @{/invoices/{id}/edit(id=${invoice.invoiceId})}"
+      th:object="${invoice}" method="post">
+
+  <input type="hidden" th:field="*{createdBy}" />
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Invoice Number <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" th:field="*{invoiceNumber}" maxlength="50" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('invoiceNumber')}" th:errors="*{invoiceNumber}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Invoice Date <span class="text-danger">*</span></label>
+      <input type="datetime-local" class="form-control" th:field="*{invoiceDate}" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('invoiceDate')}" th:errors="*{invoiceDate}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Due Date</label>
+      <input type="datetime-local" class="form-control" th:field="*{dueDate}" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Appointment <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{appointmentId}" required>
+        <option value="">-- Select appointment --</option>
+        <option th:each="appt : ${appointments}"
+                th:value="${appt.appointmentId}"
+                th:text="${'#' + appt.appointmentId + ' — ' + (appt.customer?.customerName ?: appt.customerId) + ' (' + #temporals.format(appt.appointmentDate, 'MMM d, yyyy') + ')'}">Appointment</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('appointmentId')}" th:errors="*{appointmentId}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Status</label>
+      <select class="form-select" th:field="*{status}">
+        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+      </select>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Tax Rate (%)</label>
+      <input type="number" class="form-control" th:field="*{taxRate}" step="0.0001" min="0" max="1"
+             placeholder="0.0700 = 7%" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Subtotal ($)</label>
+      <input type="number" class="form-control" th:field="*{subtotal}" step="0.01" min="0"
+             onchange="calcTotals()" id="subtotalField" />
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Tax Amount ($)</label>
+      <input type="number" class="form-control" th:field="*{taxAmount}" step="0.01" min="0" id="taxField" readonly />
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Total ($)</label>
+      <input type="number" class="form-control" th:field="*{totalAmount}" step="0.01" min="0" id="totalField" readonly />
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Notes</label>
+    <textarea class="form-control" th:field="*{notes}" rows="3"></textarea>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      <span class="fa" th:classappend="${invoice.invoiceId == null} ? 'fa-plus' : 'fa-save'"></span>
+      <span th:text="${invoice.invoiceId == null} ? 'Create Invoice' : 'Save Changes'">Submit</span>
+    </button>
+    <a href="/invoices" class="btn btn-secondary">
+      <span class="fa fa-times"></span> Cancel
+    </a>
+  </div>
+
+</form>
+
+<script th:inline="javascript">
+  const taxRate = [[${invoice.taxRate}]] || 0.07;
+  function calcTotals() {
+    const sub = parseFloat(document.getElementById('subtotalField').value) || 0;
+    const rate = parseFloat(document.querySelector('[name="taxRate"]')?.value) || taxRate;
+    const tax = sub * rate;
+    document.getElementById('taxField').value = tax.toFixed(2);
+    document.getElementById('totalField').value = (sub + tax).toFixed(2);
+  }
+</script>
+
+</body>
+</html>

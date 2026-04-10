@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'estimates')}">
+<body>
+
+<h2>
+  <span class="fa fa-clipboard"></span>
+  <span th:text="${estimate.estimateId == null} ? 'New Estimate' : 'Edit Estimate'">Estimate Form</span>
+</h2>
+
+<form th:action="${estimate.estimateId == null} ? @{/estimates/new} : @{/estimates/{id}/edit(id=${estimate.estimateId})}"
+      th:object="${estimate}" method="post">
+
+  <input type="hidden" th:field="*{preparedBy}" />
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Estimate Number <span class="text-danger">*</span></label>
+      <input type="text" class="form-control" th:field="*{estimateNumber}" maxlength="50" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('estimateNumber')}" th:errors="*{estimateNumber}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Estimate Date <span class="text-danger">*</span></label>
+      <input type="datetime-local" class="form-control" th:field="*{estimateDate}" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('estimateDate')}" th:errors="*{estimateDate}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Valid Until</label>
+      <input type="datetime-local" class="form-control" th:field="*{validUntil}" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Customer <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{customerId}" required>
+        <option value="">-- Select customer --</option>
+        <option th:each="c : ${customers}" th:value="${c.customerId}" th:text="${c.customerName}">Customer</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('customerId')}" th:errors="*{customerId}">Error</div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Vehicle (VIN) <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{vin}" required>
+        <option value="">-- Select vehicle --</option>
+        <option th:each="v : ${vehicles}"
+                th:value="${v.vin}"
+                th:text="${v.modelYear + ' ' + v.make + ' ' + v.model + ' (' + v.vin + ')'}">Vehicle</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}">Error</div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Description</label>
+    <textarea class="form-control" th:field="*{description}" rows="3" maxlength="1024"></textarea>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Labor Cost ($)</label>
+      <input type="number" class="form-control" th:field="*{laborCost}" step="0.01" min="0" />
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Parts Cost ($)</label>
+      <input type="number" class="form-control" th:field="*{partsCost}" step="0.01" min="0" />
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Tax Amount ($)</label>
+      <input type="number" class="form-control" th:field="*{taxAmount}" step="0.01" min="0" />
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Status</label>
+      <select class="form-select" th:field="*{status}">
+        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      <span class="fa" th:classappend="${estimate.estimateId == null} ? 'fa-plus' : 'fa-save'"></span>
+      <span th:text="${estimate.estimateId == null} ? 'Create Estimate' : 'Save Changes'">Submit</span>
+    </button>
+    <a href="/estimates" class="btn btn-secondary">
+      <span class="fa fa-times"></span> Cancel
+    </a>
+  </div>
+
+</form>
+
+</body>
+</html>

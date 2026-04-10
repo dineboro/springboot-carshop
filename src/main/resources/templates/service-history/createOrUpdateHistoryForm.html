@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'service-history')}">
+<body>
+
+<h2>
+  <span class="fa fa-history"></span>
+  <span th:text="${history.serviceHistoryId == null} ? 'Add Service Record' : 'Edit Service Record'">Form</span>
+</h2>
+
+<form th:action="${history.serviceHistoryId == null} ? @{/service-history/new} : @{/service-history/{id}/edit(id=${history.serviceHistoryId})}"
+      th:object="${history}" method="post">
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Vehicle (VIN) <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{vin}" required>
+        <option value="">-- Select vehicle --</option>
+        <option th:each="v : ${vehicles}"
+                th:value="${v.vin}"
+                th:text="${v.modelYear + ' ' + v.make + ' ' + v.model + ' (' + v.vin + ')'}">Vehicle</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}">Error</div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Appointment <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{appointmentId}" required>
+        <option value="">-- Select appointment --</option>
+        <option th:each="a : ${appointments}"
+                th:value="${a.appointmentId}"
+                th:text="${'#' + a.appointmentId + ' — ' + #temporals.format(a.appointmentDate, 'MMM d, yyyy')}">Appt</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('appointmentId')}" th:errors="*{appointmentId}">Error</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Service Date <span class="text-danger">*</span></label>
+      <input type="datetime-local" class="form-control" th:field="*{serviceDate}" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('serviceDate')}" th:errors="*{serviceDate}">Error</div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Mileage at Service</label>
+      <input type="number" class="form-control" th:field="*{mileage}" min="0" placeholder="e.g. 45000" />
+    </div>
+    <div class="col-md-4 mb-3">
+      <label class="form-label fw-semibold">Total Cost ($) <span class="text-danger">*</span></label>
+      <input type="number" class="form-control" th:field="*{totalCost}" step="0.01" min="0" />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('totalCost')}" th:errors="*{totalCost}">Error</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Performed By (Technician)</label>
+      <select class="form-select" th:field="*{performedBy}">
+        <option value="">-- Unassigned --</option>
+        <option th:each="t : ${technicians}"
+                th:value="${t.employeeId}"
+                th:text="${t.fullName}">Technician</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Service Summary <span class="text-danger">*</span></label>
+    <textarea class="form-control" th:field="*{serviceSummary}" rows="4" maxlength="1024"
+              placeholder="Describe all work performed..."></textarea>
+    <div class="text-danger small mt-1" th:if="${#fields.hasErrors('serviceSummary')}" th:errors="*{serviceSummary}">Error</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      <span class="fa" th:classappend="${history.serviceHistoryId == null} ? 'fa-plus' : 'fa-save'"></span>
+      <span th:text="${history.serviceHistoryId == null} ? 'Add Record' : 'Save Changes'">Submit</span>
+    </button>
+    <button type="button" class="btn btn-secondary" onclick="history.back()">
+      <span class="fa fa-times"></span> Cancel
+    </button>
+  </div>
+
+</form>
+
+</body>
+</html>

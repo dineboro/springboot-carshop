@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'service-history')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>
+    <span class="fa fa-history"></span>
+    Service History —
+    <span th:if="${vehicle != null}"
+          th:text="${vehicle.modelYear + ' ' + vehicle.make + ' ' + vehicle.model}">Vehicle</span>
+    <small class="text-muted fs-6" th:text="${vin}">VIN</small>
+  </h2>
+  <a th:href="@{/service-history/new(vin=${vin})}" class="btn btn-success">
+    <span class="fa fa-plus"></span> Add Record
+  </a>
+</div>
+
+<div th:if="${messageSuccess}" class="alert alert-success alert-dismissible fade show">
+  <span th:text="${messageSuccess}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<div th:if="${historyList != null and !historyList.empty}">
+  <table class="table table-striped">
+    <thead class="table-dark">
+    <tr>
+      <th>Service Date</th>
+      <th>Mileage</th>
+      <th>Summary</th>
+      <th>Performed By</th>
+      <th>Cost</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="h : ${historyList}">
+      <td th:text="${#temporals.format(h.serviceDate, 'MMM d, yyyy')}">Jan 1</td>
+      <td th:text="${h.mileage != null ? #numbers.formatInteger(h.mileage, 1, 'COMMA') + ' mi' : '—'}">—</td>
+      <td th:text="${h.serviceSummary}">Summary</td>
+      <td th:text="${h.performedByEmployee?.fullName ?: '—'}">—</td>
+      <td th:text="${'$' + #numbers.formatDecimal(h.totalCost, 1, 2)}">$0.00</td>
+      <td>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/service-history/{id}/edit(id=${h.serviceHistoryId})}">
+          <span class="fa fa-edit"></span>
+        </a>
+        <form th:action="@{/service-history/{id}/delete(id=${h.serviceHistoryId})}" method="post" style="display:inline;"
+              onsubmit="return confirm('Delete this history record?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <span class="fa fa-trash"></span>
+          </button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div th:if="${historyList == null or historyList.empty}" class="alert alert-info">
+  <span class="fa fa-info-circle"></span> No service history records for this vehicle.
+  <a th:href="@{/service-history/new(vin=${vin})}">Add the first one.</a>
+</div>
+
+</body>
+</html>

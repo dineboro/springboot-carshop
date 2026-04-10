@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
 <body>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -10,8 +12,14 @@
       <span class="fa fa-arrow-left"></span> Back to Customer
     </button>
     <button type="button" class="btn btn-primary ms-4 mt-0"
+            sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')"
             th:onclick="|window.location.href='@{/appointments/{id}/edit(id=${appointment.appointmentId})}'|">
       <span class="fa fa-edit"></span> Edit
+    </button>
+    <button type="button" class="btn btn-warning ms-2 mt-0"
+            sec:authorize="hasRole('TECHNICIAN')"
+            th:onclick="|window.location.href='@{/appointments/{id}/status(id=${appointment.appointmentId})}'|">
+      <span class="fa fa-wrench"></span> Update Status
     </button>
   </div>
 </div>
@@ -69,6 +77,124 @@
         <td th:text="${appointment.createdDate != null ? #temporals.format(appointment.createdDate, 'MMM d, yyyy') : '-'}">Jan 1, 2025</td>
       </tr>
     </table>
+  </div>
+</div>
+
+<!-- Service Lines -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="fw-bold"><span class="fa fa-wrench"></span> Service Lines / Work Orders</span>
+    <a class="btn btn-sm btn-success"
+       th:href="@{/appointments/{id}/service-lines/new(id=${appointment.appointmentId})}">
+      <span class="fa fa-plus"></span> Add Service Line
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <div th:if="${serviceLines != null and !serviceLines.empty}">
+      <table class="table table-sm mb-0">
+        <thead class="table-light">
+        <tr>
+          <th class="ps-3">Description</th>
+          <th>Assigned To</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sl : ${serviceLines}">
+          <td class="ps-3" th:text="${sl.serviceDescription ?: '(no description)'}">Description</td>
+          <td th:text="${sl.assignedEmployee != null ? sl.assignedEmployee.firstName + ' ' + sl.assignedEmployee.lastName : 'Unassigned'}">Tech</td>
+          <td>
+            <span class="badge"
+                  th:classappend="${sl.status.name() == 'Completed' ? 'bg-success' :
+                                  sl.status.name() == 'In_Progress' ? 'bg-warning text-dark' :
+                                  sl.status.name() == 'Cancelled' ? 'bg-secondary' : 'bg-info text-dark'}"
+                  th:text="${sl.status}">Open</span>
+          </td>
+          <td th:text="${'$' + #numbers.formatDecimal(sl.totalCost ?: 0, 1, 2)}">$0.00</td>
+          <td>
+            <a class="btn btn-sm btn-outline-secondary"
+               th:href="@{/appointments/{aId}/service-lines/{slId}/edit(aId=${appointment.appointmentId},slId=${sl.serviceLineId})}">
+              <span class="fa fa-edit"></span>
+            </a>
+            <form th:action="@{/appointments/{aId}/service-lines/{slId}/delete(aId=${appointment.appointmentId},slId=${sl.serviceLineId})}"
+                  method="post" style="display:inline;" onsubmit="return confirm('Remove this service line?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <span class="fa fa-trash"></span>
+              </button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p th:if="${serviceLines == null or serviceLines.empty}" class="text-muted p-3 mb-0">No service lines yet.</p>
+  </div>
+</div>
+
+<!-- Reminders -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="fw-bold"><span class="fa fa-bell"></span> Appointment Reminders</span>
+    <a class="btn btn-sm btn-success"
+       th:href="@{/appointments/{id}/reminders/new(id=${appointment.appointmentId})}">
+      <span class="fa fa-plus"></span> Schedule Reminder
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <div th:if="${reminders != null and !reminders.empty}">
+      <table class="table table-sm mb-0">
+        <thead class="table-light">
+        <tr>
+          <th class="ps-3">Type</th>
+          <th>Scheduled</th>
+          <th>Status</th>
+          <th>Sent</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rem : ${reminders}">
+          <td class="ps-3">
+            <span class="badge bg-secondary" th:text="${rem.reminderType}">Email</span>
+          </td>
+          <td th:text="${#temporals.format(rem.scheduledDate, 'MMM d, yyyy h:mm a')}">—</td>
+          <td>
+            <span class="badge"
+                  th:classappend="${rem.status.name() == 'Sent' ? 'bg-success' :
+                                  rem.status.name() == 'Failed' ? 'bg-danger' :
+                                  rem.status.name() == 'Cancelled' ? 'bg-secondary' : 'bg-info text-dark'}"
+                  th:text="${rem.status}">Scheduled</span>
+          </td>
+          <td th:text="${rem.sentDate != null ? #temporals.format(rem.sentDate, 'MMM d') : '—'}">—</td>
+          <td>
+            <form th:if="${rem.status.name() == 'Scheduled'}"
+                  th:action="@{/appointments/{aId}/reminders/{rId}/mark-sent(aId=${appointment.appointmentId},rId=${rem.reminderId})}"
+                  method="post" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as sent">
+                <span class="fa fa-check"></span>
+              </button>
+            </form>
+            <form th:if="${rem.status.name() == 'Scheduled'}"
+                  th:action="@{/appointments/{aId}/reminders/{rId}/cancel(aId=${appointment.appointmentId},rId=${rem.reminderId})}"
+                  method="post" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-outline-warning" title="Cancel">
+                <span class="fa fa-ban"></span>
+              </button>
+            </form>
+            <form th:action="@{/appointments/{aId}/reminders/{rId}/delete(aId=${appointment.appointmentId},rId=${rem.reminderId})}"
+                  method="post" style="display:inline;" onsubmit="return confirm('Delete this reminder?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <span class="fa fa-trash"></span>
+              </button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p th:if="${reminders == null or reminders.empty}" class="text-muted p-3 mb-0">No reminders scheduled.</p>
   </div>
 </div>
 

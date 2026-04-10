@@ -98,15 +98,56 @@
           <span th:text="#{findCustomers}">Find customers</span>
         </li>
 
-        <li th:replace="~{::menuItem ('/appointments','appointments','service appointments','calendar','Appointments')}">
-          <span class="fa fa-calendar" aria-hidden="true"></span>
-          <span>Appointments</span>
-        </li>
-
         <li th:replace="~{::menuItem ('/employees','employees','team members','wrench','Team')}">
           <span class="fa fa-wrench" aria-hidden="true"></span>
           <span>Team</span>
         </li>
+
+        <li th:replace="~{::menuItem ('/service-catalog','service-catalog','service catalog','list','Catalog')}">
+          <span class="fa fa-list" aria-hidden="true"></span>
+          <span>Catalog</span>
+        </li>
+
+        <!-- Services Dropdown -->
+        <li class="nav-item dropdown"
+            th:classappend="${menu == 'appointments' or menu == 'invoices' or menu == 'estimates' or menu == 'communications' ? 'active' : ''}">
+          <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="fa fa-cogs" aria-hidden="true"></span>
+            <span>Services</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="servicesDropdown">
+            <li>
+              <a class="dropdown-item" th:href="@{/appointments}"
+                 th:classappend="${menu == 'appointments' ? 'active' : ''}">
+                <span class="fa fa-calendar" aria-hidden="true"></span>
+                Appointments
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" th:href="@{/invoices}"
+                 th:classappend="${menu == 'invoices' ? 'active' : ''}">
+                <span class="fa fa-file-text" aria-hidden="true"></span>
+                Invoices
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" th:href="@{/estimates}"
+                 th:classappend="${menu == 'estimates' ? 'active' : ''}">
+                <span class="fa fa-clipboard" aria-hidden="true"></span>
+                Estimates
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" th:href="@{/communications}"
+                 th:classappend="${menu == 'communications' ? 'active' : ''}">
+                <span class="fa fa-comments" aria-hidden="true"></span>
+                Communications
+              </a>
+            </li>
+          </ul>
+        </li>
+
         <!-- ADMIN ONLY - Pending Approvals -->
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
           <a th:class="${menu == 'admin' ? 'nav-link active' : 'nav-link'}"

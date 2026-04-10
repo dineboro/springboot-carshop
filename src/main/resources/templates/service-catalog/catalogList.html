@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'service-catalog')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-list"></span> Service Catalog</h2>
+  <button type="button" class="btn btn-success" onclick="window.location.href='/service-catalog/new'">
+    <span class="fa fa-plus"></span> Add Service
+  </button>
+</div>
+
+<div th:if="${messageSuccess}" class="alert alert-success alert-dismissible fade show">
+  <span th:text="${messageSuccess}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<div th:if="${listServices != null and !listServices.empty}">
+  <table class="table table-striped table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Default Price</th>
+      <th>Labor Hours</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="svc : ${listServices}">
+      <td>
+        <a th:href="@{/service-catalog/{id}(id=${svc.catalogId})}" th:text="${svc.name}">Service Name</a>
+      </td>
+      <td>
+        <span class="badge bg-secondary" th:text="${svc.category}">Category</span>
+      </td>
+      <td th:text="${svc.defaultPrice != null ? '$' + #numbers.formatDecimal(svc.defaultPrice, 1, 2) : '—'}">$0.00</td>
+      <td th:text="${svc.defaultLaborHours != null ? svc.defaultLaborHours + ' hrs' : '—'}">—</td>
+      <td>
+        <span class="badge"
+              th:classappend="${svc.active} ? 'bg-success' : 'bg-secondary'"
+              th:text="${svc.active} ? 'Active' : 'Inactive'">Active</span>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/service-catalog/{id}/edit(id=${svc.catalogId})}">
+          <span class="fa fa-edit"></span>
+        </a>
+        <form th:action="@{/service-catalog/{id}/delete(id=${svc.catalogId})}" method="post" style="display:inline;"
+              onsubmit="return confirm('Remove this service from the catalog?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <span class="fa fa-trash"></span>
+          </button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <nav th:if="${totalPages > 1}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+        <a class="page-link" th:href="@{/service-catalog(page=${currentPage - 1})}">Previous</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+          th:classappend="${i == currentPage} ? 'active'">
+        <a class="page-link" th:href="@{/service-catalog(page=${i})}" th:text="${i}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+        <a class="page-link" th:href="@{/service-catalog(page=${currentPage + 1})}">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<div th:if="${listServices == null or listServices.empty}" class="alert alert-info">
+  <span class="fa fa-info-circle"></span>
+  No services in the catalog yet. <a th:href="@{/service-catalog/new}">Add the first one.</a>
+</div>
+
+</body>
+</html>

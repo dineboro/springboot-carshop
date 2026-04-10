@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'service-catalog')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-list"></span> <span th:text="${serviceCatalog.name}">Service Name</span></h2>
+  <div>
+    <button type="button" class="btn btn-secondary" onclick="window.location.href='/service-catalog'">
+      <span class="fa fa-arrow-left"></span> Back to Catalog
+    </button>
+    <button type="button" class="btn btn-primary ms-2"
+            th:onclick="|window.location.href='@{/service-catalog/{id}/edit(id=${serviceCatalog.catalogId})}'|">
+      <span class="fa fa-edit"></span> Edit
+    </button>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <table class="table table-borderless mb-0">
+      <tr>
+        <th style="width: 160px;">Name</th>
+        <td th:text="${serviceCatalog.name}">Service Name</td>
+      </tr>
+      <tr>
+        <th>Category</th>
+        <td>
+          <span class="badge bg-secondary fs-6" th:text="${serviceCatalog.category}">Category</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td>
+          <span class="badge fs-6"
+                th:classappend="${serviceCatalog.active} ? 'bg-success' : 'bg-secondary'"
+                th:text="${serviceCatalog.active} ? 'Active' : 'Inactive'">Active</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Default Price</th>
+        <td th:text="${serviceCatalog.defaultPrice != null ? '$' + #numbers.formatDecimal(serviceCatalog.defaultPrice, 1, 2) : '—'}">—</td>
+      </tr>
+      <tr>
+        <th>Labor Hours</th>
+        <td th:text="${serviceCatalog.defaultLaborHours != null ? serviceCatalog.defaultLaborHours + ' hours' : '—'}">—</td>
+      </tr>
+      <tr>
+        <th>Description</th>
+        <td th:text="${serviceCatalog.description != null ? serviceCatalog.description : '—'}">—</td>
+      </tr>
+      <tr>
+        <th>Added</th>
+        <td th:text="${serviceCatalog.createdDate != null ? #temporals.format(serviceCatalog.createdDate, 'MMM d, yyyy') : '—'}">—</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

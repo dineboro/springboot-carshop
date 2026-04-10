@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
+<body>
+
+<h2>
+  <span class="fa fa-wrench"></span>
+  <span th:text="${serviceLine.serviceLineId == null} ? 'Add Work Order' : 'Edit Work Order'">Work Order Form</span>
+</h2>
+
+<div class="mb-3">
+  <a th:href="@{/appointments/{id}(id=${appointmentId})}" class="btn btn-sm btn-outline-secondary">
+    <span class="fa fa-arrow-left"></span> Back to Appointment
+  </a>
+</div>
+
+<form th:action="${serviceLine.serviceLineId == null}
+        ? @{/appointments/{aId}/service-lines/new(aId=${appointmentId})}
+        : @{/appointments/{aId}/service-lines/{slId}/edit(aId=${appointmentId},slId=${serviceLine.serviceLineId})}"
+      th:object="${serviceLine}" method="post">
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Service Catalog <small class="text-muted">(optional)</small></label>
+      <select class="form-select" th:field="*{serviceCatalogId}" id="catalogSelect" onchange="applyFromCatalog()">
+        <option value="">-- Select from catalog (optional) --</option>
+        <option th:each="cat : ${catalogItems}"
+                th:value="${cat.catalogId}"
+                th:data-desc="${cat.name}"
+                th:data-hours="${cat.defaultLaborHours}"
+                th:data-price="${cat.defaultPrice}"
+                th:text="${cat.name}">Service</option>
+      </select>
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Vehicle (VIN) <span class="text-danger">*</span></label>
+      <select class="form-select" th:field="*{vin}" required>
+        <option value="">-- Select vehicle --</option>
+        <option th:each="v : ${vehicles}"
+                th:value="${v.vin}"
+                th:text="${v.modelYear + ' ' + v.make + ' ' + v.model + ' (' + v.vin + ')'}">Vehicle</option>
+      </select>
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}">Error</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label fw-semibold">Service Date <span class="text-danger">*</span></label>
+      <input type="datetime-local" class="form-control" th:field="*{serviceDate}" required />
+      <div class="text-danger small mt-1" th:if="${#fields.hasErrors('serviceDate')}" th:errors="*{serviceDate}">Error</div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Assigned Technician</label>
+      <select class="form-select" th:field="*{assignedTo}">
+        <option value="">-- Unassigned --</option>
+        <option th:each="tech : ${technicians}"
+                th:value="${tech.employeeId}"
+                th:text="${tech.fullName + ' (' + tech.role + ')'}">Technician</option>
+      </select>
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Status</label>
+      <select class="form-select" th:field="*{status}">
+        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+    <textarea class="form-control" th:field="*{serviceDescription}" id="descField"
+              rows="3" maxlength="1024" placeholder="Describe the work to be done..." required></textarea>
+    <div class="text-danger small mt-1" th:if="${#fields.hasErrors('serviceDescription')}" th:errors="*{serviceDescription}">Error</div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Labor Hours</label>
+      <input type="number" class="form-control" th:field="*{laborHours}" id="laborHoursField"
+             step="0.25" min="0" placeholder="0.00" oninput="calcLaborCost()" />
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Labor Rate ($/hr)</label>
+      <input type="number" class="form-control" th:field="*{laborRate}" id="laborRateField"
+             step="0.01" min="0" placeholder="0.00" oninput="calcLaborCost()" />
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Labor Cost ($)</label>
+      <input type="number" class="form-control" th:field="*{laborCost}" id="laborCostField"
+             step="0.01" min="0" placeholder="0.00" readonly />
+    </div>
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Parts Cost ($)</label>
+      <input type="number" class="form-control" th:field="*{partsCost}" id="partsCostField"
+             step="0.01" min="0" placeholder="0.00" oninput="calcTotal()" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <label class="form-label fw-semibold">Total Cost ($)</label>
+      <input type="number" class="form-control fw-bold" th:field="*{totalCost}" id="totalCostField"
+             step="0.01" min="0" placeholder="0.00" readonly />
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Notes</label>
+    <textarea class="form-control" th:field="*{notes}" rows="2" maxlength="1024" placeholder="Internal notes..."></textarea>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      <span class="fa" th:classappend="${serviceLine.serviceLineId == null} ? 'fa-plus' : 'fa-save'"></span>
+      <span th:text="${serviceLine.serviceLineId == null} ? 'Add Work Order' : 'Save Changes'">Submit</span>
+    </button>
+    <a th:href="@{/appointments/{id}(id=${appointmentId})}" class="btn btn-secondary">
+      <span class="fa fa-times"></span> Cancel
+    </a>
+  </div>
+
+</form>
+
+<script th:inline="javascript">
+  const catalog = {};
+  /*[# th:each="cat : ${catalogItems}"]*/
+  catalog[/*[[${cat.catalogId}]]*/ 0] = {
+    desc: /*[[${cat.name}]]*/ '',
+    hours: /*[[${cat.defaultLaborHours}]]*/ null,
+    price: /*[[${cat.defaultPrice}]]*/ null
+  };
+  /*[/]*/
+
+  function applyFromCatalog() {
+    const sel = document.getElementById('catalogSelect');
+    const item = catalog[sel.value];
+    if (!item) return;
+    document.getElementById('descField').value = item.desc;
+    if (item.hours != null) {
+      document.getElementById('laborHoursField').value = item.hours;
+    }
+    if (item.price != null) {
+      document.getElementById('laborRateField').value = item.price;
+    }
+    calcLaborCost();
+  }
+
+  function calcLaborCost() {
+    const hours = parseFloat(document.getElementById('laborHoursField').value) || 0;
+    const rate  = parseFloat(document.getElementById('laborRateField').value)  || 0;
+    const labor = (hours * rate).toFixed(2);
+    document.getElementById('laborCostField').value = labor;
+    calcTotal();
+  }
+
+  function calcTotal() {
+    const labor = parseFloat(document.getElementById('laborCostField').value) || 0;
+    const parts = parseFloat(document.getElementById('partsCostField').value) || 0;
+    document.getElementById('totalCostField').value = (labor + parts).toFixed(2);
+  }
+</script>
+
+</body>
+</html>

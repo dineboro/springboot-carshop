@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'communications')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-comments"></span> Communication Log</h2>
+  <a href="/communications/new" class="btn btn-success">
+    <span class="fa fa-plus"></span> Log Communication
+  </a>
+</div>
+
+<div th:if="${messageSuccess}" class="alert alert-success alert-dismissible fade show">
+  <span th:text="${messageSuccess}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- Follow-up alerts -->
+<div th:if="${pendingFollowUps != null and !pendingFollowUps.empty}" class="alert alert-warning">
+  <span class="fa fa-exclamation-circle"></span>
+  <strong><span th:text="${pendingFollowUps.size()}">0</span> follow-up(s) pending.</strong>
+  <a href="#followups" class="alert-link ms-2">View below</a>
+</div>
+
+<div th:if="${listCommunications != null and !listCommunications.empty}">
+  <table class="table table-striped table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>Date</th>
+      <th>Customer</th>
+      <th>Type</th>
+      <th>Direction</th>
+      <th>Subject</th>
+      <th>Follow-up</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="comm : ${listCommunications}">
+      <td th:text="${#temporals.format(comm.communicationDate, 'MMM d, yyyy HH:mm')}">Jan 1</td>
+      <td>
+        <a th:href="@{/customers/{id}(id=${comm.customerId})}"
+           th:text="${comm.customer?.customerName ?: comm.customerId}">Customer</a>
+      </td>
+      <td><span class="badge bg-secondary" th:text="${comm.communicationType}">Phone</span></td>
+      <td>
+        <span class="badge"
+              th:classappend="${comm.direction.name() == 'Inbound'} ? 'bg-info text-dark' : 'bg-primary'"
+              th:text="${comm.direction}">Outbound</span>
+      </td>
+      <td th:text="${comm.subject ?: '—'}">Subject</td>
+      <td>
+        <span th:if="${comm.followUpRequired}" class="badge bg-warning text-dark">
+          <span class="fa fa-clock-o"></span>
+          <span th:text="${comm.followUpDate != null ? #temporals.format(comm.followUpDate, 'MMM d') : 'Pending'}">Pending</span>
+        </span>
+        <span th:if="${!comm.followUpRequired}" class="text-muted">—</span>
+      </td>
+      <td>
+        <a class="btn btn-sm btn-outline-primary" th:href="@{/communications/{id}(id=${comm.communicationId})}">
+          <span class="fa fa-eye"></span>
+        </a>
+        <a class="btn btn-sm btn-outline-secondary" th:href="@{/communications/{id}/edit(id=${comm.communicationId})}">
+          <span class="fa fa-edit"></span>
+        </a>
+        <form th:action="@{/communications/{id}/delete(id=${comm.communicationId})}" method="post" style="display:inline;"
+              onsubmit="return confirm('Delete this communication log?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <span class="fa fa-trash"></span>
+          </button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <nav th:if="${totalPages > 1}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+        <a class="page-link" th:href="@{/communications(page=${currentPage - 1})}">Previous</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+          th:classappend="${i == currentPage} ? 'active'">
+        <a class="page-link" th:href="@{/communications(page=${i})}" th:text="${i}">1</a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+        <a class="page-link" th:href="@{/communications(page=${currentPage + 1})}">Next</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<div th:if="${listCommunications == null or listCommunications.empty}" class="alert alert-info">
+  <span class="fa fa-info-circle"></span> No communications logged yet.
+  <a th:href="@{/communications/new}">Log one now.</a>
+</div>
+
+</body>
+</html>

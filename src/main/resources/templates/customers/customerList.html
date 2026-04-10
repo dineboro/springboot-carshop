@@ -29,7 +29,7 @@
     <td th:text="${customer.phone}">555-1234</td>
     <td th:text="${customer.email != null ? customer.email : 'N/A'}"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="593c34383035193c21383429353c773a3634">[email&#160;protected]</a></td>
     <td>
-      <span class="badge badge-success" th:text="${customer.status}">ACTIVE</span>
+      <span class="badge badge-success" style="color: black" th:text="${customer.status}">ACTIVE</span>
     </td>
     <td th:text="${customer.vehicles.size()}">0</td>
   </tr>

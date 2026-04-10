@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'appointments')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-wrench"></span> Update Appointment Status</h2>
+  <button type="button" class="btn btn-secondary"
+          th:onclick="|window.location.href='@{/appointments/{id}(id=${appointment.appointmentId})}'|">
+    <span class="fa fa-arrow-left"></span> Back
+  </button>
+</div>
+
+<!-- Read-only appointment summary -->
+<div class="card mb-4">
+  <div class="card-header"><strong>Appointment #<span th:text="${appointment.appointmentId}"></span></strong></div>
+  <div class="card-body">
+    <table class="table table-borderless mb-0">
+      <tr>
+        <th style="width: 160px;">Date &amp; Time</th>
+        <td th:text="${#temporals.format(appointment.appointmentDate, 'EEEE, MMMM d, yyyy h:mm a')}">—</td>
+      </tr>
+      <tr>
+        <th>Vehicle</th>
+        <td>
+          <span th:if="${appointment.vehicle != null}"
+                th:text="${appointment.vehicle.modelYear + ' ' + appointment.vehicle.make + ' ' + appointment.vehicle.model}">—</span>
+          <code th:if="${appointment.vehicle == null}" th:text="${appointment.vin}">VIN</code>
+        </td>
+      </tr>
+      <tr>
+        <th>Description</th>
+        <td th:text="${appointment.description != null ? appointment.description : '-'}">—</td>
+      </tr>
+      <tr>
+        <th>Current Status</th>
+        <td>
+          <span class="badge fs-6"
+                th:classappend="${appointment.status.name() == 'Scheduled' ? 'bg-primary' :
+                                (appointment.status.name() == 'In_Progress' ? 'bg-warning text-dark' :
+                                (appointment.status.name() == 'Completed' ? 'bg-success' :
+                                (appointment.status.name() == 'Cancelled' ? 'bg-secondary' : 'bg-danger')))}"
+                th:text="${appointment.status}">Scheduled</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- Status/Notes update form -->
+<form th:action="@{/appointments/{id}/status(id=${appointment.appointmentId})}" method="post">
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">New Status <span class="text-danger">*</span></label>
+    <select class="form-select" name="status" required>
+      <option th:each="s : ${statuses}"
+              th:value="${s}"
+              th:text="${s}"
+              th:selected="${s == appointment.status}">Status</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Notes</label>
+    <textarea class="form-control" name="notes" rows="4"
+              placeholder="Add notes about the work performed, parts used, etc."
+              th:text="${appointment.notes}"></textarea>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary mt-0">
+      <span class="fa fa-save"></span> Save
+    </button>
+    <button type="button" class="btn btn-secondary"
+            th:onclick="|window.location.href='@{/appointments/{id}(id=${appointment.appointmentId})}'|">
+      <span class="fa fa-times"></span> Cancel
+    </button>
+  </div>
+
+</form>
+
+</body>
+</html>

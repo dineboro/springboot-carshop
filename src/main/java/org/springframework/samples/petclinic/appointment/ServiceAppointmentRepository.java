@@ -13,11 +13,18 @@ public interface ServiceAppointmentRepository extends Repository<ServiceAppointm
 
 	@Transactional(readOnly = true)
 	@Query(value = "SELECT a FROM ServiceAppointment a LEFT JOIN FETCH a.vehicle LEFT JOIN FETCH a.customer",
-		countQuery = "SELECT COUNT(a) FROM ServiceAppointment a")
+			countQuery = "SELECT COUNT(a) FROM ServiceAppointment a")
 	Page<ServiceAppointment> findAll(Pageable pageable);
 
 	@Transactional(readOnly = true)
+	List<ServiceAppointment> findAll();
+
+	@Transactional(readOnly = true)
 	Optional<ServiceAppointment> findById(Integer id);
+
+	@Transactional(readOnly = true)
+	@Query("SELECT a FROM ServiceAppointment a LEFT JOIN FETCH a.vehicle LEFT JOIN FETCH a.customer WHERE a.appointmentId = :id")
+	Optional<ServiceAppointment> findByIdWithDetails(Integer id);
 
 	void save(ServiceAppointment appointment);
 

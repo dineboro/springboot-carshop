@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'communications')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-comments"></span> Communication Log</h2>
+  <div>
+    <a href="/communications" class="btn btn-secondary">
+      <span class="fa fa-arrow-left"></span> Back
+    </a>
+    <a class="btn btn-primary ms-2" th:href="@{/communications/{id}/edit(id=${communication.communicationId})}">
+      <span class="fa fa-edit"></span> Edit
+    </a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <table class="table table-borderless mb-0">
+      <tr>
+        <th style="width:160px;">Date</th>
+        <td th:text="${#temporals.format(communication.communicationDate, 'MMMM d, yyyy h:mm a')}">—</td>
+      </tr>
+      <tr>
+        <th>Customer</th>
+        <td>
+          <a th:href="@{/customers/{id}(id=${communication.customerId})}"
+             th:text="${communication.customer?.customerName ?: communication.customerId}">Customer</a>
+        </td>
+      </tr>
+      <tr th:if="${communication.appointmentId != null}">
+        <th>Appointment</th>
+        <td>
+          <a th:href="@{/appointments/{id}(id=${communication.appointmentId})}"
+             th:text="'Appointment #' + ${communication.appointmentId}">Appt</a>
+        </td>
+      </tr>
+      <tr>
+        <th>Type</th>
+        <td><span class="badge bg-secondary fs-6" th:text="${communication.communicationType}">Phone</span></td>
+      </tr>
+      <tr>
+        <th>Direction</th>
+        <td>
+          <span class="badge fs-6"
+                th:classappend="${communication.direction.name() == 'Inbound'} ? 'bg-info text-dark' : 'bg-primary'"
+                th:text="${communication.direction}">Outbound</span>
+        </td>
+      </tr>
+      <tr th:if="${communication.subject != null}">
+        <th>Subject</th>
+        <td th:text="${communication.subject}">Subject</td>
+      </tr>
+      <tr>
+        <th>Notes</th>
+        <td th:text="${communication.notes ?: '—'}">Notes</td>
+      </tr>
+      <tr>
+        <th>Follow-up Required</th>
+        <td>
+          <span th:if="${communication.followUpRequired}" class="badge bg-warning text-dark">
+            Yes — <span th:text="${communication.followUpDate != null ? #temporals.format(communication.followUpDate, 'MMM d, yyyy') : 'date TBD'}">—</span>
+          </span>
+          <span th:if="${!communication.followUpRequired}" class="text-muted">No</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

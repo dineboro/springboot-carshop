@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.samples.petclinic.appointment.ServiceAppointmentRepository;
 
 import java.util.List;
 
@@ -38,6 +39,9 @@ class CustomerControllerTest {
 
 	@MockitoBean
 	private CustomerRepository customers;
+
+	@MockitoBean
+	private ServiceAppointmentRepository appointmentRepository;
 
 	private Customer customer;
 

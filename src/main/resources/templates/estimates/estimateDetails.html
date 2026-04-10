@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'estimates')}">
+<body>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2><span class="fa fa-clipboard"></span> Estimate <span th:text="${estimate.estimateNumber}">EST-00001</span></h2>
+  <div>
+    <a href="/estimates" class="btn btn-secondary">
+      <span class="fa fa-arrow-left"></span> Back
+    </a>
+    <a class="btn btn-primary ms-2" th:href="@{/estimates/{id}/edit(id=${estimate.estimateId})}">
+      <span class="fa fa-edit"></span> Edit
+    </a>
+  </div>
+</div>
+
+<div th:if="${messageSuccess}" class="alert alert-success alert-dismissible fade show">
+  <span th:text="${messageSuccess}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<div th:if="${messageError}" class="alert alert-danger alert-dismissible fade show">
+  <span th:text="${messageError}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header fw-bold">Estimate Details</div>
+      <div class="card-body">
+        <table class="table table-borderless mb-0">
+          <tr><th style="width:140px;">Estimate #</th><td th:text="${estimate.estimateNumber}">EST-00001</td></tr>
+          <tr>
+            <th>Status</th>
+            <td>
+              <span class="badge fs-6"
+                    th:classappend="${estimate.status.name() == 'Approved' ? 'bg-success' :
+                                    (estimate.status.name() == 'Rejected' or estimate.status.name() == 'Expired') ? 'bg-danger' :
+                                    estimate.status.name() == 'Sent' ? 'bg-info text-dark' : 'bg-secondary'}"
+                    th:text="${estimate.status}">Draft</span>
+            </td>
+          </tr>
+          <tr><th>Customer</th><td th:text="${estimate.customer?.customerName ?: '—'}">—</td></tr>
+          <tr><th>Vehicle (VIN)</th><td th:text="${estimate.vin}">—</td></tr>
+          <tr><th>Date</th><td th:text="${estimate.estimateDate != null ? #temporals.format(estimate.estimateDate, 'MMM d, yyyy') : '—'}">—</td></tr>
+          <tr th:if="${estimate.validUntil != null}">
+            <th>Valid Until</th>
+            <td th:text="${#temporals.format(estimate.validUntil, 'MMM d, yyyy')}">—</td>
+          </tr>
+          <tr th:if="${estimate.description != null and !estimate.description.blank}">
+            <th>Description</th><td th:text="${estimate.description}">—</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header fw-bold">Cost Summary</div>
+      <div class="card-body">
+        <table class="table table-borderless mb-0">
+          <tr><th style="width:140px;">Labor</th><td th:text="${'$' + #numbers.formatDecimal(estimate.laborCost ?: 0, 1, 2)}">$0.00</td></tr>
+          <tr><th>Parts</th><td th:text="${'$' + #numbers.formatDecimal(estimate.partsCost ?: 0, 1, 2)}">$0.00</td></tr>
+          <tr><th>Tax (7%)</th><td th:text="${'$' + #numbers.formatDecimal(estimate.taxAmount ?: 0, 1, 2)}">$0.00</td></tr>
+          <tr class="fw-bold table-light"><th>Total</th><td th:text="${'$' + #numbers.formatDecimal(estimate.totalEstimate ?: 0, 1, 2)}">$0.00</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Line Items -->
+<div class="card mb-4">
+  <div class="card-header fw-bold">Services &amp; Line Items</div>
+  <div class="card-body">
+
+    <div th:if="${lineItems != null and !lineItems.empty}">
+      <table class="table table-sm">
+        <thead class="table-light">
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${lineItems}">
+          <td><span class="badge bg-secondary" th:text="${item.itemType}">Type</span></td>
+          <td th:text="${item.description}">Description</td>
+          <td th:text="${item.quantity}">1</td>
+          <td th:text="${'$' + #numbers.formatDecimal(item.unitPrice, 1, 2)}">$0.00</td>
+          <td th:text="${'$' + #numbers.formatDecimal(item.totalPrice, 1, 2)}">$0.00</td>
+          <td th:text="${item.notes ?: '—'}">—</td>
+          <td>
+            <form th:action="@{/estimates/{eid}/line-items/{iid}/delete(eid=${estimate.estimateId},iid=${item.estimateLineItemId})}"
+                  method="post" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-outline-danger"
+                      onclick="return confirm('Remove this service?')">
+                <span class="fa fa-trash"></span>
+              </button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p th:if="${lineItems == null or lineItems.empty}" class="text-muted mb-3">No services added yet.</p>
+
+    <hr />
+
+    <!-- Pick from Catalog -->
+    <div th:if="${catalogItems != null and !catalogItems.empty}" class="mb-3">
+      <h6 class="fw-bold">Add from Service Catalog</h6>
+      <div class="input-group" style="max-width: 500px;">
+        <select id="catalogPicker" class="form-select form-select-sm">
+          <option value="">-- Select a catalog service --</option>
+          <option th:each="cat : ${catalogItems}"
+                  th:value="${cat.catalogId}"
+                  th:data-name="${cat.name}"
+                  th:data-category="${cat.category}"
+                  th:data-price="${cat.defaultPrice}"
+                  th:data-hours="${cat.defaultLaborHours}"
+                  th:text="${cat.name + (cat.defaultPrice != null ? ' — $' + #numbers.formatDecimal(cat.defaultPrice, 1, 2) : '')}">
+            Service Name
+          </option>
+        </select>
+        <button class="btn btn-sm btn-outline-primary" type="button" onclick="applyCatalogItem()">
+          <span class="fa fa-arrow-down"></span> Apply
+        </button>
+      </div>
+      <small class="text-muted">Selecting a service fills in the form below automatically.</small>
+    </div>
+
+    <!-- Add Line Item Form -->
+    <h6 class="fw-bold">Add Line Item</h6>
+    <form th:action="@{/estimates/{id}/line-items/new(id=${estimate.estimateId})}"
+          th:object="${newLineItem}" method="post">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-2">
+          <label class="form-label form-label-sm mb-1">Type</label>
+          <select class="form-select form-select-sm" th:field="*{itemType}" id="itemTypeField" required>
+            <option value="">Type</option>
+            <option th:each="t : ${itemTypes}" th:value="${t}" th:text="${t}">Type</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label form-label-sm mb-1">Description</label>
+          <input type="text" class="form-control form-control-sm" th:field="*{description}" id="descriptionField"
+                 placeholder="Description" maxlength="500" required />
+        </div>
+        <div class="col-md-1">
+          <label class="form-label form-label-sm mb-1">Qty</label>
+          <input type="number" class="form-control form-control-sm" th:field="*{quantity}" id="quantityField"
+                 step="0.01" min="0.01" placeholder="1" oninput="calcLineTotal()" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label form-label-sm mb-1">Unit Price ($)</label>
+          <input type="number" class="form-control form-control-sm" th:field="*{unitPrice}" id="unitPriceField"
+                 step="0.01" min="0" placeholder="0.00" oninput="calcLineTotal()" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label form-label-sm mb-1">Total ($)</label>
+          <input type="number" class="form-control form-control-sm" th:field="*{totalPrice}" id="lineTotalField"
+                 step="0.01" min="0" placeholder="0.00" readonly />
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-sm btn-primary w-100">
+            <span class="fa fa-plus"></span>
+          </button>
+        </div>
+      </div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-11">
+          <input type="text" class="form-control form-control-sm" th:field="*{notes}" placeholder="Notes (optional)" maxlength="500" />
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  const catalogItems = {};
+  /*[# th:each="cat : ${catalogItems}"]*/
+  catalogItems[/*[[${cat.catalogId}]]*/ 0] = {
+    name: /*[[${cat.name}]]*/ '',
+    category: /*[[${cat.category}]]*/ '',
+    price: /*[[${cat.defaultPrice}]]*/ 0,
+    hours: /*[[${cat.defaultLaborHours}]]*/ 1
+  };
+  /*[/]*/
+
+  function applyCatalogItem() {
+    const picker = document.getElementById('catalogPicker');
+    const id = picker.value;
+    if (!id) return;
+    const item = catalogItems[id];
+    if (!item) return;
+
+    document.getElementById('descriptionField').value = item.name;
+    document.getElementById('unitPriceField').value = item.price != null ? item.price : '';
+
+    // Map category to item type
+    const typeField = document.getElementById('itemTypeField');
+    if (item.category === 'Maintenance' || item.category === 'Repair' ||
+        item.category === 'Inspection' || item.category === 'Diagnostic' || item.category === 'Other') {
+      typeField.value = 'Service';
+    }
+
+    // Default qty to labor hours if available, else 1
+    const qtyField = document.getElementById('quantityField');
+    qtyField.value = item.hours != null ? item.hours : 1;
+
+    calcLineTotal();
+  }
+
+  function calcLineTotal() {
+    const qty = parseFloat(document.getElementById('quantityField').value) || 1;
+    const price = parseFloat(document.getElementById('unitPriceField').value) || 0;
+    document.getElementById('lineTotalField').value = (qty * price).toFixed(2);
+  }
+</script>
+
+</body>
+</html>
