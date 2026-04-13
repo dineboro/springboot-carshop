@@ -99,9 +99,9 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/communications/**")
 				.authenticated()
 
-				// Service history — managers, technicians
+				// Service history — managers, technicians, receptionists
 				.requestMatchers(HttpMethod.POST, "/service-history/**")
-				.hasAnyRole("ADMIN", "MANAGER", "TECHNICIAN")
+				.hasAnyRole("ADMIN", "MANAGER", "TECHNICIAN", "RECEPTIONIST")
 
 				// Require login for shop management features
 				.requestMatchers("/appointments/**", "/vehicles/**", "/employees/**", "/service-catalog/**",

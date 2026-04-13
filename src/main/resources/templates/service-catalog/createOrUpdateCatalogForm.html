@@ -20,7 +20,7 @@
       <label class="form-label fw-semibold">Category</label>
       <select class="form-select" th:field="*{category}">
         <option value="">-- Select a category --</option>
-        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}">Category</option>
+        <option th:each="c : ${categories}" th:value="${c.name()}" th:text="${c.label}">Category</option>
       </select>
     </div>
   </div>

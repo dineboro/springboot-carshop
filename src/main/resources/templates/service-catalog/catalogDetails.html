@@ -25,7 +25,9 @@
       <tr>
         <th>Category</th>
         <td>
-          <span class="badge bg-secondary fs-6" th:text="${serviceCatalog.category}">Category</span>
+          <span class="badge fs-6"
+                th:classappend="${serviceCatalog.category != null ? serviceCatalog.category.badgeClass : 'bg-secondary'}"
+                th:text="${serviceCatalog.category != null ? serviceCatalog.category.label : '—'}">Category</span>
         </td>
       </tr>
       <tr>

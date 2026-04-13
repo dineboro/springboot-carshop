@@ -32,7 +32,8 @@
         <a th:href="@{/service-catalog/{id}(id=${svc.catalogId})}" th:text="${svc.name}">Service Name</a>
       </td>
       <td>
-        <span class="badge bg-secondary" th:text="${svc.category}">Category</span>
+        <span class="badge" th:classappend="${svc.category != null ? svc.category.badgeClass : 'bg-secondary'}"
+              th:text="${svc.category != null ? svc.category.label : '—'}">Category</span>
       </td>
       <td th:text="${svc.defaultPrice != null ? '$' + #numbers.formatDecimal(svc.defaultPrice, 1, 2) : '—'}">$0.00</td>
       <td th:text="${svc.defaultLaborHours != null ? svc.defaultLaborHours + ' hrs' : '—'}">—</td>

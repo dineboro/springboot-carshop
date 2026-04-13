@@ -14,6 +14,33 @@ import java.time.LocalDateTime;
 @Setter
 public class ServiceCatalog {
 
+	public enum ServiceCategory {
+		GENERAL_SERVICE("General Service", "bg-primary"),
+		OIL_CHANGE("Oil Change", "bg-warning text-dark"),
+		TIRE_SERVICE("Tire Service", "bg-info text-dark"),
+		BRAKE_SERVICE("Brake Service", "bg-danger"),
+		BATTERY_SERVICE("Battery Service", "bg-success"),
+		INSPECTION("Inspection", "bg-secondary"),
+		DIAGNOSTIC("Diagnostic", "bg-dark"),
+		ELECTRICAL("Electrical", "bg-warning text-dark"),
+		TRANSMISSION("Transmission", "bg-primary"),
+		AC_COOLING("A/C & Cooling", "bg-info text-dark"),
+		FILTERS_WIPERS("Filters & Wipers", "bg-secondary"),
+		ALIGNMENT("Alignment", "bg-success"),
+		OTHER("Other", "bg-secondary");
+
+		private final String label;
+		private final String badgeClass;
+
+		ServiceCategory(String label, String badgeClass) {
+			this.label = label;
+			this.badgeClass = badgeClass;
+		}
+
+		public String getLabel() { return label; }
+		public String getBadgeClass() { return badgeClass; }
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "service_catalog_id")
@@ -24,7 +51,7 @@ public class ServiceCatalog {
 	private String name;
 
 	@Column(name = "category", length = 100)
-	private String category;
+	private ServiceCategory category;
 
 	@Column(name = "description", length = 1024)
 	private String description;
