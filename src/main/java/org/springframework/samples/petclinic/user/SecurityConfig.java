@@ -34,9 +34,9 @@ public class SecurityConfig {
 				.hasRole("ADMIN")
 
 				// Customer create/edit — MANAGER and RECEPTIONIST only
-				.requestMatchers(HttpMethod.GET, "/customers/new", "/customers/*/edit")
+				.requestMatchers(HttpMethod.GET, "/customers/*/edit")
 				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
-				.requestMatchers(HttpMethod.POST, "/customers/new", "/customers/*/edit")
+				.requestMatchers(HttpMethod.POST, "/customers/*/edit")
 				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST")
 
 				// Vehicle create/edit/delete — MANAGER and RECEPTIONIST only
@@ -64,13 +64,21 @@ public class SecurityConfig {
 						"/recipes/new")
 				.permitAll()
 
+				// Only SUPER_ADMIN users can add new schools
+				.requestMatchers("/schools/new")
+				.hasAuthority("MANAGE_ALL_SCHOOLS")
+				// All users can access the list of schools and individual schools
+				.requestMatchers(HttpMethod.GET, "/schools", "/schools/{schoolId:\\d+}",
+						"/schools/{slug:[a-zA-Z0-9-]*[a-zA-Z-][a-zA-Z0-9-]*}")
+				.permitAll()
+
 				// Require login for the profile and any other user settings
 				.requestMatchers("/users/profile", "/users/delete")
 				.authenticated()
 
 				// Allow POST for registration, login, and creating new subscriptions
 				.requestMatchers("/register-student", "/register", "/login", "/schools/new", "/owners/new",
-						"/subscriptions/new")
+						"/subscriptions/new", "/customers/new")
 				.permitAll()
 
 				// Service catalog — managers/admins manage, others read-only

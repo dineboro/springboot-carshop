@@ -98,7 +98,9 @@ public class ServiceLine {
 	}
 
 	public enum ServiceLineStatus {
+
 		Open, In_Progress, Completed, Cancelled
+
 	}
 
 }

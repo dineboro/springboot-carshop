@@ -15,21 +15,17 @@ import java.time.LocalDateTime;
 public class ServiceCatalog {
 
 	public enum ServiceCategory {
-		GENERAL_SERVICE("General Service", "bg-primary"),
-		OIL_CHANGE("Oil Change", "bg-warning text-dark"),
-		TIRE_SERVICE("Tire Service", "bg-info text-dark"),
-		BRAKE_SERVICE("Brake Service", "bg-danger"),
-		BATTERY_SERVICE("Battery Service", "bg-success"),
-		INSPECTION("Inspection", "bg-secondary"),
-		DIAGNOSTIC("Diagnostic", "bg-dark"),
-		ELECTRICAL("Electrical", "bg-warning text-dark"),
-		TRANSMISSION("Transmission", "bg-primary"),
-		AC_COOLING("A/C & Cooling", "bg-info text-dark"),
-		FILTERS_WIPERS("Filters & Wipers", "bg-secondary"),
-		ALIGNMENT("Alignment", "bg-success"),
+
+		GENERAL_SERVICE("General Service", "bg-primary"), OIL_CHANGE("Oil Change", "bg-warning text-dark"),
+		TIRE_SERVICE("Tire Service", "bg-info text-dark"), BRAKE_SERVICE("Brake Service", "bg-danger"),
+		BATTERY_SERVICE("Battery Service", "bg-success"), INSPECTION("Inspection", "bg-secondary"),
+		DIAGNOSTIC("Diagnostic", "bg-dark"), ELECTRICAL("Electrical", "bg-warning text-dark"),
+		TRANSMISSION("Transmission", "bg-primary"), AC_COOLING("A/C & Cooling", "bg-info text-dark"),
+		FILTERS_WIPERS("Filters & Wipers", "bg-secondary"), ALIGNMENT("Alignment", "bg-success"),
 		OTHER("Other", "bg-secondary");
 
 		private final String label;
+
 		private final String badgeClass;
 
 		ServiceCategory(String label, String badgeClass) {
@@ -37,8 +33,14 @@ public class ServiceCatalog {
 			this.badgeClass = badgeClass;
 		}
 
-		public String getLabel() { return label; }
-		public String getBadgeClass() { return badgeClass; }
+		public String getLabel() {
+			return label;
+		}
+
+		public String getBadgeClass() {
+			return badgeClass;
+		}
+
 	}
 
 	@Id

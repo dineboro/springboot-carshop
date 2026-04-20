@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'service-catalog')}">
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (~{::body},'service-catalog')}">
 <body>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -9,6 +11,7 @@
       <span class="fa fa-arrow-left"></span> Back to Catalog
     </button>
     <button type="button" class="btn btn-primary ms-2"
+            sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
             th:onclick="|window.location.href='@{/service-catalog/{id}/edit(id=${serviceCatalog.catalogId})}'|">
       <span class="fa fa-edit"></span> Edit
     </button>

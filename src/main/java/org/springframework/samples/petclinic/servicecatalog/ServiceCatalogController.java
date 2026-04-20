@@ -43,8 +43,8 @@ public class ServiceCatalogController {
 	}
 
 	@PostMapping("/new")
-	public String processCreationForm(@Valid ServiceCatalog serviceCatalog,
-			BindingResult result, RedirectAttributes redirectAttributes) {
+	public String processCreationForm(@Valid ServiceCatalog serviceCatalog, BindingResult result,
+			RedirectAttributes redirectAttributes) {
 		if (result.hasErrors()) {
 			return "service-catalog/createOrUpdateCatalogForm";
 		}
@@ -80,7 +80,8 @@ public class ServiceCatalogController {
 		}
 		serviceCatalog.setCatalogId(catalogId);
 		serviceCatalogRepository.save(serviceCatalog);
-		redirectAttributes.addFlashAttribute("messageSuccess", "\"" + serviceCatalog.getName() + "\" updated successfully.");
+		redirectAttributes.addFlashAttribute("messageSuccess",
+				"\"" + serviceCatalog.getName() + "\" updated successfully.");
 		return "redirect:/service-catalog/" + catalogId;
 	}
 

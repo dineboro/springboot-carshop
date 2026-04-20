@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'service-catalog')}">
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (~{::body},'service-catalog')}">
 <body>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2><span class="fa fa-list"></span> Service Catalog</h2>
-  <button type="button" class="btn btn-success" onclick="window.location.href='/service-catalog/new'">
+  <button type="button" class="btn btn-success"
+          sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
+          onclick="window.location.href='/service-catalog/new'">
     <span class="fa fa-plus"></span> Add Service
   </button>
 </div>
@@ -23,7 +27,7 @@
       <th>Default Price</th>
       <th>Labor Hours</th>
       <th>Status</th>
-      <th>Actions</th>
+      <th sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -42,7 +46,7 @@
               th:classappend="${svc.active} ? 'bg-success' : 'bg-secondary'"
               th:text="${svc.active} ? 'Active' : 'Inactive'">Active</span>
       </td>
-      <td>
+      <td sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
         <a class="btn btn-sm btn-outline-secondary" th:href="@{/service-catalog/{id}/edit(id=${svc.catalogId})}">
           <span class="fa fa-edit"></span>
         </a>
@@ -75,7 +79,10 @@
 
 <div th:if="${listServices == null or listServices.empty}" class="alert alert-info">
   <span class="fa fa-info-circle"></span>
-  No services in the catalog yet. <a th:href="@{/service-catalog/new}">Add the first one.</a>
+  No services in the catalog yet.
+  <span sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+    <a th:href="@{/service-catalog/new}">Add the first one.</a>
+  </span>
 </div>
 
 </body>

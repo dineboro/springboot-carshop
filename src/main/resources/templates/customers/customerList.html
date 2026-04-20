@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'customers')}">
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (~{::body},'customers')}">
 
 <head>
   <meta charset="UTF-8">
@@ -51,9 +53,10 @@
           <a class="page-link" th:href="@{/customers(page=${currentPage - 1})}" th:text="#{previous}">Previous</a>
         </li>
 
-        <!-- Current page indicator -->
-        <li class="page-item active">
-          <span class="page-link" th:text="${currentPage}">1</span>
+        <!-- Page number links -->
+        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+            th:classappend="${i == currentPage} ? 'active'">
+          <a class="page-link" th:href="@{/customers(page=${i})}" th:text="${i}">1</a>
         </li>
 
         <!-- Next page -->
@@ -80,8 +83,8 @@
   </div>
 </div>
 
-<!-- Action buttons -->
-<div class="row">
+<!-- Action buttons — staff only -->
+<div class="row" sec:authorize="isAuthenticated() and !hasRole('CUSTOMER')">
   <div class="col-sm-12 d-flex align-items-center gap-4">
     <button type="button" class="btn btn-primary mt-0"
             onclick="window.location.href='/customers/new'">

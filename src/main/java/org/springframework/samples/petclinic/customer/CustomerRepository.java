@@ -31,6 +31,10 @@ public interface CustomerRepository extends Repository<Customer, Integer> {
 	Optional<Customer> findByEmail(String email);
 
 	@Transactional(readOnly = true)
+	@Query("SELECT c FROM Customer c WHERE c.userId = :userId")
+	Optional<Customer> findByUserId(Integer userId);
+
+	@Transactional(readOnly = true)
 	@Query("SELECT c FROM Customer c WHERE LOWER(c.customerName) LIKE LOWER(CONCAT('%', :name, '%'))")
 	Page<Customer> findByNameContaining(String name, Pageable pageable);
 

@@ -1,13 +1,21 @@
 package org.springframework.samples.petclinic.system;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -55,6 +63,32 @@ public class WebConfiguration implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(localeChangeInterceptor());
+	}
+
+	/**
+	 * Redirects URLs with a trailing slash to the equivalent URL without the slash.
+	 * Example: /customers/ → /customers
+	 */
+	@Bean
+	public FilterRegistrationBean<OncePerRequestFilter> trailingSlashRedirectFilter() {
+		FilterRegistrationBean<OncePerRequestFilter> registration = new FilterRegistrationBean<>();
+		registration.setFilter(new OncePerRequestFilter() {
+			@Override
+			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+					FilterChain filterChain) throws ServletException, IOException {
+				String path = request.getRequestURI();
+				if (path.length() > 1 && path.endsWith("/")) {
+					String trimmed = path.substring(0, path.length() - 1);
+					String query = request.getQueryString();
+					response.sendRedirect(trimmed + (query != null ? "?" + query : ""));
+				}
+				else {
+					filterChain.doFilter(request, response);
+				}
+			}
+		});
+		registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+		return registration;
 	}
 
 }

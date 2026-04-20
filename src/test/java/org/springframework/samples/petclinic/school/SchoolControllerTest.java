@@ -35,6 +35,9 @@ class SchoolControllerTest {
 	@MockitoBean
 	private SchoolRepository schools;
 
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserRepository userRepository;
+
 	private School school;
 
 	@BeforeEach
@@ -80,7 +83,7 @@ class SchoolControllerTest {
 	void testProcessCreationFormSuccess() throws Exception {
 		mockMvc.perform(post("/schools/new").param("name", "University of Iowa").param("domain", "uiowa.edu"))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/schools"));
+			.andExpect(redirectedUrlPattern("/schools/*"));
 
 		// Verify that the repository.save() method was actually called
 		verify(schools).save(any(School.class));

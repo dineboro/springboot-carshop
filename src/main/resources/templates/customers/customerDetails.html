@@ -196,7 +196,7 @@
   <span class="fa fa-plus"></span> Schedule Appointment
 </button>
 
-<div class="mt-4 d-flex gap-2 flex-wrap">
+<div class="mt-4 d-flex gap-2 flex-wrap" sec:authorize="isAuthenticated() and !hasRole('CUSTOMER')">
   <a th:href="@{/estimates/new(customerId=${customer.customerId})}" class="btn btn-outline-secondary">
     <span class="fa fa-clipboard"></span> New Estimate
   </a>

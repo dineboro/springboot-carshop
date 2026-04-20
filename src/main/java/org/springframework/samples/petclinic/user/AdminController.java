@@ -21,6 +21,14 @@ public class AdminController {
 	}
 
 	/**
+	 * Redirect /admin to /admin/pending-approvals
+	 */
+	@GetMapping({ "", "/" })
+	public String redirectToPendingApprovals() {
+		return "redirect:/admin/pending-approvals";
+	}
+
+	/**
 	 * Show pending user approvals
 	 */
 	@GetMapping("/pending-approvals")

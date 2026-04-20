@@ -24,11 +24,10 @@
              size="50"
              maxlength="256"
              th:placeholder="#{label.customer.name}"
-             required
              autofocus/>
       <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"
             th:if="${!#fields.hasErrors('customerName')}"></span>
-      <span class="help-block" th:if="${#fields.hasErrors('customerName')}" th:errors="*{customerName}">
+      <span class="help-block" style="color: red;" th:if="${#fields.hasErrors('customerName')}" th:errors="*{customerName}">
                 Error
             </span>
     </div>
@@ -45,10 +44,9 @@
              maxlength="20"
              pattern="[0-9]{10}"
              th:placeholder="'5551234567'"
-             required
              title="Please enter a 10-digit phone number without spaces or dashes"/>
       <small class="form-text text-muted">Format: 10 digits without spaces (e.g., 5551234567)</small>
-      <span class="help-block" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">
+      <span class="help-block" style="color: red;" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">
                 Error
             </span>
     </div>
@@ -65,7 +63,7 @@
              maxlength="256"
              th:placeholder="'customer@example.com'"/>
       <small class="form-text text-muted">Optional - used for portal access and notifications</small>
-      <span class="help-block" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+      <span class="help-block" style="color: red;" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
                 Error
             </span>
     </div>

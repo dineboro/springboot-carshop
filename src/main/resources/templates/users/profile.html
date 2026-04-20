@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
       th:replace="~{fragments/layout :: layout (~{::body},'profile')}">
 <body>
 
@@ -18,10 +19,15 @@
       </div>
     </div>
 
-    <a th:if="${schoolSlug != null}"
+    <a sec:authorize="hasAnyRole('STUDENT', 'SCHOOL_ADMIN')"
        th:href="@{/schools/{slug}(slug=${schoolSlug})}"
        class="btn btn-outline-primary">
       <i class="fa fa-arrow-left me-1"></i> Go to My Dashboard
+    </a>
+    <a sec:authorize="!hasAnyRole('STUDENT', 'SCHOOL_ADMIN')"
+       th:href="@{/}"
+       class="btn btn-outline-primary">
+      <i class="fa fa-home me-1"></i> Back to Home
     </a>
   </div>
 

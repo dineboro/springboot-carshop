@@ -88,28 +88,28 @@
           <span th:text="#{home}">Home</span>
         </li>
 
-        <li th:replace="~{::menuItem ('/schools','schools','find schools','search',#{findSchools})}">
-          <span class="fa fa-search" aria-hidden="true"></span>
-          <span th:text="#{findSchools}">Find schools</span>
-        </li>
-
-        <li th:replace="~{::menuItem ('/customers','customers','find customers','users',#{findCustomers})}">
+        <!-- STAFF ONLY: Find Customers, Team, Catalog, Services -->
+        <li sec:authorize="isAuthenticated() and !hasRole('CUSTOMER')"
+            th:replace="~{::menuItem ('/customers','customers','find customers','users',#{findCustomers})}">
           <span class="fa fa-users" aria-hidden="true"></span>
           <span th:text="#{findCustomers}">Find customers</span>
         </li>
 
-        <li th:replace="~{::menuItem ('/employees','employees','team members','wrench','Team')}">
+        <li sec:authorize="isAuthenticated() and !hasRole('CUSTOMER')"
+            th:replace="~{::menuItem ('/employees','employees','team members','wrench','Team')}">
           <span class="fa fa-wrench" aria-hidden="true"></span>
           <span>Team</span>
         </li>
 
-        <li th:replace="~{::menuItem ('/service-catalog','service-catalog','service catalog','list','Catalog')}">
+        <li sec:authorize="isAuthenticated()"
+            th:replace="~{::menuItem ('/service-catalog','service-catalog','service catalog','list','Catalog')}">
           <span class="fa fa-list" aria-hidden="true"></span>
           <span>Catalog</span>
         </li>
 
-        <!-- Services Dropdown -->
+        <!-- Services Dropdown — staff only -->
         <li class="nav-item dropdown"
+            sec:authorize="isAuthenticated() and !hasRole('CUSTOMER')"
             th:classappend="${menu == 'appointments' or menu == 'invoices' or menu == 'estimates' or menu == 'communications' ? 'active' : ''}">
           <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
@@ -148,6 +148,23 @@
           </ul>
         </li>
 
+        <!-- CUSTOMER ONLY: Appointments, My Vehicle -->
+        <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
+          <a th:class="${menu == 'appointments' ? 'nav-link active' : 'nav-link'}"
+             th:href="@{/appointments}">
+            <span class="fa fa-calendar" aria-hidden="true"></span>
+            <span>My Appointments</span>
+          </a>
+        </li>
+
+        <li class="nav-item" sec:authorize="hasRole('CUSTOMER')" th:if="${linkedCustomerId != null}">
+          <a th:class="${menu == 'my-vehicle' ? 'nav-link active' : 'nav-link'}"
+             th:href="@{/customers/{id}(id=${linkedCustomerId})}">
+            <span class="fa fa-car" aria-hidden="true"></span>
+            <span>My Vehicle</span>
+          </a>
+        </li>
+
         <!-- ADMIN ONLY - Pending Approvals -->
         <li class="nav-item" sec:authorize="hasRole('ADMIN')">
           <a th:class="${menu == 'admin' ? 'nav-link active' : 'nav-link'}"
@@ -157,28 +174,6 @@
             <span>Pending Approvals</span>
           </a>
         </li>
-        <li th:replace="~{::menuItem ('/pricing','pricing','Subscription pricing','trophy',#{pricingPage})}">
-<!--          <a th:href="@{/subscriptions/new}" class="btn btn-primary" style="margin-bottom: 15px;">-->
-          <span class="fa fa-trophy" aria-hidden="true"></span>
-          <span th:text="#{pricingPage}">Pricing</span>
-        </li>
-
-
-        <!--          <li th:replace="~{::menuItem ('/owners/find','owners','find owners','search',#{findOwners})}">-->
-<!--            <span class="fa fa-search" aria-hidden="true"></span>-->
-<!--            <span th:text="#{findOwners}">Find owners</span>-->
-<!--          </li>-->
-
-<!--          <li th:replace="~{::menuItem ('/vets.html','vets','veterinarians','th-list',#{vets})}">-->
-<!--            <span class="fa fa-th-list" aria-hidden="true"></span>-->
-<!--            <span th:text="#{vets}">Veterinarians</span>-->
-<!--          </li>-->
-
-<!--          <li-->
-<!--            th:replace="~{::menuItem ('/oups','error','trigger a RuntimeException to see how it is handled','exclamation-triangle',#{error})}">-->
-<!--            <span class="fa exclamation-triangle" aria-hidden="true"></span>-->
-<!--            <span th:text="#{error}">Error</span>-->
-<!--          </li>-->
 
       </ul>
 
@@ -226,6 +221,13 @@
     </div>
   </div>
 </nav>
+<div th:if="${messageDanger}"
+     class="alert alert-danger alert-dismissible fade show flash-message"
+     role="alert">
+  <i class="fa fa-times-circle"></i>
+  <span th:text="${messageDanger}">Error</span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 <div class="container-fluid">
   <div class="container xd-container">
 

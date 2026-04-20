@@ -138,6 +138,13 @@ INSERT IGNORE INTO locations (school_id, parent_location_id, name, description, 
 (1, 3, 'Basketball Court 1', 'North court', 'active'),
 (1, 3, 'Basketball Court 2', 'South court', 'active');
 
+INSERT IGNORE INTO recipes (recipe_ingredients, instructions, type, category, dietary_preference, internal_notes) VALUES
+('Flour, eggs, milk, butter, sugar, baking powder', 'Mix dry ingredients. Add wet ingredients. Bake at 350F for 30 minutes.', 'Baked', 'Dessert', 'Vegetarian', 'Classic vanilla cake recipe'),
+('Chicken breast, garlic, olive oil, lemon, herbs', 'Season chicken. Sear in olive oil. Roast at 400F for 25 minutes.', 'Roasted', 'Main Course', 'Gluten-Free', 'Herb roasted chicken'),
+('Pasta, tomato sauce, ground beef, onion, garlic', 'Brown beef with onion and garlic. Add tomato sauce. Cook pasta. Combine.', 'Stovetop', 'Main Course', 'None', 'Classic bolognese'),
+('Lettuce, tomato, cucumber, red onion, feta, olives, olive oil', 'Chop vegetables. Combine in bowl. Dress with olive oil and salt.', 'Raw', 'Salad', 'Vegetarian', 'Greek salad'),
+('Black beans, corn, bell pepper, lime juice, cilantro, cumin', 'Combine all ingredients. Season with cumin and lime juice. Chill before serving.', 'Raw', 'Side Dish', 'Vegan', 'Black bean corn salad');
+
 INSERT IGNORE INTO subscriptions (name, description, monthly_price, annual_price) VALUES
 ('Free', 'Get started with 10 free leagues for your college or university.', 0, 0),
 ('Pro', 'Create up to 25 leagues for your college or university.', 25, 250);

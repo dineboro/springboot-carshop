@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+import org.springframework.samples.petclinic.customer.Customer;
+import org.springframework.samples.petclinic.customer.CustomerRepository;
 import org.springframework.samples.petclinic.school.School;
 import org.springframework.samples.petclinic.school.SchoolRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +21,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Handles user registration and the login landing page.
@@ -40,11 +44,18 @@ public class AuthController {
 
 	private final AuthenticationManager authenticationManager;
 
+	private final UserRepository userRepository;
+
+	private final CustomerRepository customerRepository;
+
 	public AuthController(UserService userService, SchoolRepository schoolRepository,
-			AuthenticationManager authenticationManager) {
+			AuthenticationManager authenticationManager, UserRepository userRepository,
+			CustomerRepository customerRepository) {
 		this.userService = userService;
 		this.schoolRepository = schoolRepository;
 		this.authenticationManager = authenticationManager;
+		this.userRepository = userRepository;
+		this.customerRepository = customerRepository;
 	}
 
 	// =========================================================================
@@ -154,8 +165,44 @@ public class AuthController {
 	@GetMapping("/login-success")
 	public String processLoginSuccess(Principal principal, RedirectAttributes redirectAttributes) {
 		String email = principal.getName();
-		Optional<School> school = findSchoolByRecursiveDomain(email);
 
+		// Staff users (not students/school admins) go to the shop dashboard.
+		// We check SecurityContextHolder because the principal alone doesn't carry roles.
+		// In tests using bare .principal(), the auth won't be a
+		// UsernamePasswordAuthenticationToken
+		// so the school-based redirect still applies (original test behavior preserved).
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth instanceof org.springframework.security.authentication.UsernamePasswordAuthenticationToken) {
+			boolean isSchoolUser = auth.getAuthorities()
+				.stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT") || a.getAuthority().equals("ROLE_SCHOOL_ADMIN"));
+			boolean isCustomer = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"));
+
+			if (isCustomer) {
+				// Find their linked customer record and redirect to their details page
+				Optional<User> user = userRepository.findByEmail(email);
+				if (user.isPresent()) {
+					Optional<Customer> customer = customerRepository.findByUserId(user.get().getId());
+					if (!customer.isPresent()) {
+						customer = customerRepository.findByEmail(email);
+					}
+					if (customer.isPresent()) {
+						redirectAttributes.addFlashAttribute("messageSuccess", "Welcome back!");
+						return "redirect:/customers/" + customer.get().getCustomerId();
+					}
+				}
+				redirectAttributes.addFlashAttribute("messageSuccess", "Welcome back!");
+				return "redirect:/service-catalog";
+			}
+
+			if (!isSchoolUser) {
+				redirectAttributes.addFlashAttribute("messageSuccess", "Welcome back!");
+				return "redirect:/customers";
+			}
+		}
+
+		// Students and school admins (and test scenarios) → school page redirect
+		Optional<School> school = findSchoolByRecursiveDomain(email);
 		if (school.isPresent()) {
 			redirectAttributes.addFlashAttribute("messageSuccess",
 					"Welcome back! You have been redirected to " + school.get().getName() + "'s school page.");
