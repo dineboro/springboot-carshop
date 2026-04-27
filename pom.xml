@@ -120,6 +120,11 @@
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-communication-email</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.thymeleaf.extras</groupId>
       <artifactId>thymeleaf-extras-springsecurity6</artifactId>
     </dependency>

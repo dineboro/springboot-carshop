@@ -4,7 +4,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,35 +19,33 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		// 1. Find the user
-		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new UsernameNotFoundException("No user found with email: " + email));
+	public UserDetails loadUserByUsername(String emailOrPhone) throws UsernameNotFoundException {
+		// 1. Find the user by email first, then fall back to phone number
+		User user = userRepository.findByEmail(emailOrPhone)
+			.or(() -> userRepository.findByPhone(emailOrPhone))
+			.orElseThrow(() -> new UsernameNotFoundException("No user found with: " + emailOrPhone));
 
-		// 2. Check if user is approved
-		if (!Boolean.TRUE.equals(user.getIsApproved())) {
-			throw new DisabledException("Your account is pending approval. Please contact an administrator.");
+		// 2. Block deleted accounts before anything else
+		if (user.getDeletedAt() != null) {
+			throw new UsernameNotFoundException("No user found with: " + emailOrPhone);
 		}
 
-		// 3. Check if user is active
-		if (!Boolean.TRUE.equals(user.getIsActive())) {
-			throw new DisabledException("Your account has been deactivated.");
-		}
-
-		// 4. Build authorities — use ROLE_ prefix to match Spring Security conventions
+		// 3. Build authorities — use ROLE_ prefix to match Spring Security conventions
 		List<SimpleGrantedAuthority> authorities = user.getRoles()
 			.stream()
 			.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
 			.collect(Collectors.toList());
-		// 5. Block Deleted Account
-		if (user.getDeletedAt() != null) {
-			throw new UsernameNotFoundException("No user found with email '" + email + "'.");
-		}
-		// 6. Return UserDetails
+
+		// 4. Return UserDetails — disabled(true) lets Spring Security throw
+		// DisabledException via preAuthenticationChecks, which reaches the failure
+		// handler correctly (throwing directly from here gets wrapped).
+		boolean approved = Boolean.TRUE.equals(user.getIsApproved());
+		boolean active = Boolean.TRUE.equals(user.getIsActive());
 		return org.springframework.security.core.userdetails.User.builder()
 			.username(user.getEmail())
 			.password(user.getPassword())
 			.authorities(authorities)
+			.disabled(!approved || !active)
 			.build();
 	}
 

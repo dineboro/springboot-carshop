@@ -55,6 +55,11 @@ public class SecurityConfig {
 				.requestMatchers("/appointments/*/status")
 				.hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST", "TECHNICIAN")
 
+				// Service catalog new/edit — ADMIN and MANAGER only (must be before the
+				// blanket GET permit)
+				.requestMatchers(HttpMethod.GET, "/service-catalog/new", "/service-catalog/*/edit")
+				.hasAnyRole("ADMIN", "MANAGER")
+
 				// Allow all other GET requests (view/read pages)
 				.requestMatchers(HttpMethod.GET)
 				.permitAll()
@@ -78,13 +83,11 @@ public class SecurityConfig {
 
 				// Allow POST for registration, login, and creating new subscriptions
 				.requestMatchers("/register-student", "/register", "/login", "/schools/new", "/owners/new",
-						"/subscriptions/new", "/customers/new")
+						"/subscriptions/new", "/customers/new", "/invite/**", "/forgot-password", "/reset-password")
 				.permitAll()
 
 				// Service catalog — managers/admins manage, others read-only
 				.requestMatchers(HttpMethod.POST, "/service-catalog/**")
-				.hasAnyRole("ADMIN", "MANAGER")
-				.requestMatchers(HttpMethod.GET, "/service-catalog/new")
 				.hasAnyRole("ADMIN", "MANAGER")
 
 				// Invoices — managers and service advisors

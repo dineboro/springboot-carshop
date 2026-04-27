@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS users (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at DATETIME,
+  reset_token VARCHAR(255),
+  reset_token_expires_at DATETIME,
   UNIQUE INDEX idx_users_email (email),
   INDEX idx_users_name (last_name, first_name)
   ) engine=InnoDB;
@@ -497,6 +499,24 @@ CREATE TABLE IF NOT EXISTS purchase_order_item (
   COMMENT='Purchase order items';
 
 
+-- Customer Invitation Tokens
+CREATE TABLE IF NOT EXISTS customer_invitations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  invitation_token VARCHAR(255) NOT NULL UNIQUE,
+  invited_by INT NULL,
+  invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NOT NULL,
+  is_used BOOLEAN DEFAULT FALSE,
+  used_at TIMESTAMP NULL,
+  FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE CASCADE,
+  FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_invitation_token (invitation_token),
+  INDEX idx_invitation_customer (customer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- AppointmentReminder Table
 CREATE TABLE IF NOT EXISTS appointment_reminder (
                                     reminder_id INT NOT NULL AUTO_INCREMENT,
@@ -517,30 +537,6 @@ CREATE TABLE IF NOT EXISTS appointment_reminder (
   COMMENT='Appointment reminders';
 
 
--- =====================================================
--- PART 3: CUSTOMER PORTAL INVITATION SYSTEM
--- (For future implementation - receptionist invites customers)
--- =====================================================
-
-CREATE TABLE IF NOT EXISTS customer_invitations (
-                                    id INT AUTO_INCREMENT PRIMARY KEY,
-                                    customer_id INT NOT NULL,
-                                    email VARCHAR(255) NOT NULL,
-                                    invitation_token VARCHAR(255) NOT NULL UNIQUE,
-                                    invited_by INT NOT NULL COMMENT 'user_id of receptionist who sent invite',
-                                    invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                    expires_at TIMESTAMP NOT NULL,
-                                    is_used BOOLEAN DEFAULT FALSE,
-                                    used_at TIMESTAMP NULL,
-
-                                    FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON DELETE CASCADE,
-                                    FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE RESTRICT,
-
-                                    INDEX idx_invitation_token (invitation_token),
-                                    INDEX idx_invitation_customer (customer_id),
-                                    INDEX idx_invitation_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Customer portal registration invitations (future feature)';
 
 
 

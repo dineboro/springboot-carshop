@@ -62,8 +62,8 @@
   -->
   <form th:action="@{/login}" th:object="${user}" method="post" class="form-horizontal">
 
-    <!-- Email field — uses shared inputField fragment for consistent styling -->
-    <div th:replace="~{fragments/inputField :: input ('Email Address', 'email', 'text')}"></div>
+    <!-- Email or Phone field -->
+    <div th:replace="~{fragments/inputField :: input ('Email or Phone Number', 'email', 'text')}"></div>
 
     <!-- Password field -->
     <div th:replace="~{fragments/inputField :: input ('Password', 'password', 'password')}"></div>
@@ -77,6 +77,7 @@
 
     <!-- Link to registration -->
     <div class="text-center mt-3">
+      <p><a th:href="@{/forgot-password}">Forgot your password?</a></p>
       <p>Don't have an account?
         <a th:href="@{/register}">Register here</a>
       </p>

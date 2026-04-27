@@ -26,6 +26,11 @@ public class Role {
 	@ToString.Exclude // ADD THIS
 	private Set<User> users;
 
-	// We will add the relationship to Permissions later.
+	@ManyToMany
+	@JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"),
+			inverseJoinColumns = @JoinColumn(name = "permission_id"))
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private Set<Permission> permissions;
 
 }

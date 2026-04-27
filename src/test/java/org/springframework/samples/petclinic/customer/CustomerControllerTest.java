@@ -43,6 +43,15 @@ class CustomerControllerTest {
 	@MockitoBean
 	private ServiceAppointmentRepository appointmentRepository;
 
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.EmailService emailService;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.InvitationTokenRepository invitationTokenRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserRepository userRepository;
+
 	private Customer customer;
 
 	@BeforeEach

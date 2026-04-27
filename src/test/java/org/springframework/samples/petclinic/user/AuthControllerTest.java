@@ -54,6 +54,15 @@ class AuthControllerTest {
 	@MockitoBean
 	private UserDetailsServiceImpl userDetailsService;
 
+	@MockitoBean
+	private UserRepository userRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.customer.CustomerRepository customerRepository;
+
+	@MockitoBean
+	private EmailService emailService;
+
 	// =========================================================================
 	// Marc's test
 	// =========================================================================

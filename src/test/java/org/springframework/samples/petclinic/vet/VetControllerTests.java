@@ -51,6 +51,15 @@ class VetControllerTests {
 	@MockitoBean
 	private VetRepository vets;
 
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserRepository userRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.customer.CustomerRepository customerRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserDetailsServiceImpl userDetailsService;
+
 	private Vet james() {
 		Vet james = new Vet();
 		james.setFirstName("James");

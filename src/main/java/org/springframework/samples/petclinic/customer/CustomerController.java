@@ -1,19 +1,30 @@
 package org.springframework.samples.petclinic.customer;
 
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.samples.petclinic.appointment.ServiceAppointmentRepository;
+import org.springframework.samples.petclinic.user.EmailService;
+import org.springframework.samples.petclinic.user.InvitationToken;
+import org.springframework.samples.petclinic.user.InvitationTokenRepository;
+import org.springframework.samples.petclinic.user.User;
+import org.springframework.samples.petclinic.user.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.samples.petclinic.appointment.ServiceAppointmentRepository;
-
-import java.util.Map;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class CustomerController {
@@ -22,33 +33,77 @@ public class CustomerController {
 
 	private final ServiceAppointmentRepository appointmentRepository;
 
-	public CustomerController(CustomerRepository customerRepository,
-			ServiceAppointmentRepository appointmentRepository) {
+	private final InvitationTokenRepository invitationTokenRepository;
+
+	private final EmailService emailService;
+
+	private final UserRepository userRepository;
+
+	@Value("${app.base-url}")
+	private String baseUrl;
+
+	public CustomerController(CustomerRepository customerRepository, ServiceAppointmentRepository appointmentRepository,
+			InvitationTokenRepository invitationTokenRepository, EmailService emailService,
+			UserRepository userRepository) {
 		this.customerRepository = customerRepository;
 		this.appointmentRepository = appointmentRepository;
+		this.invitationTokenRepository = invitationTokenRepository;
+		this.emailService = emailService;
+		this.userRepository = userRepository;
 	}
 
 	@GetMapping("/customers/new")
 	public String initCreationForm(Map<String, Customer> model) {
-		// Instantiate a default object
 		Customer customer = new Customer();
-		// Add customer to input model so Thymeleaf can bind data to it
 		model.put("customer", customer);
 		return "customers/createOrUpdateCustomerForm";
 	}
 
 	@PostMapping("/customers/new")
-	public String processCreationForm(@Valid Customer customer, BindingResult result) {
+	public String processCreationForm(@Valid Customer customer, BindingResult result,
+			RedirectAttributes redirectAttributes) {
 		if (result.hasErrors()) {
 			return "customers/createOrUpdateCustomerForm";
 		}
 		customerRepository.save(customer);
+
+		if (customer.getEmail() != null && !customer.getEmail().isBlank()) {
+			try {
+				Integer invitedBy = null;
+				Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+				if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+					Optional<User> currentUser = userRepository.findByEmail(auth.getName());
+					invitedBy = currentUser.map(User::getId).orElse(null);
+				}
+
+				InvitationToken token = new InvitationToken();
+				token.setCustomerId(customer.getCustomerId());
+				token.setEmail(customer.getEmail());
+				token.setToken(UUID.randomUUID().toString());
+				token.setInvitedBy(invitedBy);
+				token.setExpiresAt(LocalDateTime.now().plusHours(48));
+				invitationTokenRepository.save(token);
+
+				String inviteLink = baseUrl + "/invite/accept?token=" + token.getToken();
+				emailService.sendInvitation(customer.getEmail(), customer.getCustomerName(), inviteLink);
+
+				redirectAttributes.addFlashAttribute("messageSuccess",
+						"Customer saved! Invitation email sent to " + customer.getEmail());
+			}
+			catch (Exception e) {
+				redirectAttributes.addFlashAttribute("messageWarning",
+						"Customer saved, but the invitation email could not be sent: " + e.getMessage());
+			}
+		}
+		else {
+			redirectAttributes.addFlashAttribute("messageSuccess", "Customer saved successfully.");
+		}
+
 		return "redirect:/customers";
 	}
 
 	@GetMapping("/customers")
 	public String showCustomerList(@RequestParam(defaultValue = "1") int page, Model model) {
-		// Pagination setup (5 items per page)
 		Pageable pageable = PageRequest.of(page - 1, 5);
 		Page<Customer> customerPage = customerRepository.findAll(pageable);
 
@@ -81,7 +136,6 @@ public class CustomerController {
 	@GetMapping("/customers/search")
 	public String processFindForm(@RequestParam(defaultValue = "1") int page,
 			@RequestParam(required = false) String customerName, Model model) {
-		// If no search term provided, show all customers
 		Pageable pageable = PageRequest.of(page - 1, 5);
 		Page<Customer> customerPage;
 

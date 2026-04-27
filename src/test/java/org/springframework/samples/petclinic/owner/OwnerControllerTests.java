@@ -68,6 +68,15 @@ class OwnerControllerTests {
 	@MockitoBean
 	private OwnerRepository owners;
 
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserRepository userRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.customer.CustomerRepository customerRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserDetailsServiceImpl userDetailsService;
+
 	private Owner george() {
 		Owner george = new Owner();
 		george.setId(TEST_OWNER_ID);

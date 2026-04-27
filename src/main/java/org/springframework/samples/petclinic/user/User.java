@@ -70,6 +70,12 @@ public class User extends BaseEntity {
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 
+	@Column(name = "reset_token", length = 255)
+	private String resetToken;
+
+	@Column(name = "reset_token_expires_at")
+	private LocalDateTime resetTokenExpiresAt;
+
 	// Many-to-Many Relationship with Role
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),

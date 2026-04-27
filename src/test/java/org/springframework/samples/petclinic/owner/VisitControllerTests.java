@@ -55,6 +55,15 @@ class VisitControllerTests {
 	@MockitoBean
 	private OwnerRepository owners;
 
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserRepository userRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.customer.CustomerRepository customerRepository;
+
+	@MockitoBean
+	private org.springframework.samples.petclinic.user.UserDetailsServiceImpl userDetailsService;
+
 	@BeforeEach
 	void init() {
 		Owner owner = new Owner();

@@ -10,6 +10,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 	Optional<User> findByEmail(String email);
 
+	Optional<User> findByPhone(String phone);
+
 	// NEW: Find unapproved users
 	@Query("SELECT u FROM User u WHERE u.isApproved = false ORDER BY u.createdAt DESC")
 	List<User> findByIsApprovedFalse();

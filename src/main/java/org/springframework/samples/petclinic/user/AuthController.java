@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -46,15 +49,21 @@ public class AuthController {
 
 	private final UserRepository userRepository;
 
+	private final EmailService emailService;
+
 	private final CustomerRepository customerRepository;
 
+	@org.springframework.beans.factory.annotation.Value("${app.base-url}")
+	private String baseUrl;
+
 	public AuthController(UserService userService, SchoolRepository schoolRepository,
-			AuthenticationManager authenticationManager, UserRepository userRepository,
+			AuthenticationManager authenticationManager, UserRepository userRepository, EmailService emailService,
 			CustomerRepository customerRepository) {
 		this.userService = userService;
 		this.schoolRepository = schoolRepository;
 		this.authenticationManager = authenticationManager;
 		this.userRepository = userRepository;
+		this.emailService = emailService;
 		this.customerRepository = customerRepository;
 	}
 
@@ -307,6 +316,44 @@ public class AuthController {
 			domain = domain.substring(domain.indexOf(".") + 1);
 		}
 		return Optional.empty();
+	}
+
+	@GetMapping("/forgot-password")
+	public String showForgotPasswordForm() {
+		return "auth/forgotPasswordForm";
+	}
+
+	@PostMapping("/forgot-password")
+	public String processForgotPassword(@RequestParam("email") String email, RedirectAttributes redirectAttributes) {
+
+		Optional<User> userOptional = userRepository.findByEmail(email);
+
+		if (userOptional.isPresent()) {
+			User user = userOptional.get();
+
+			// 1. Generate a secure token
+			String token = UUID.randomUUID().toString();
+
+			// 2. Save this token and an expiration timestamp (15 minutes from now)
+			user.setResetToken(token);
+			user.setResetTokenExpiresAt(LocalDateTime.now().plusMinutes(15));
+			userRepository.save(user);
+
+			// 3. Build the dynamic reset link
+			String resetLink = baseUrl + "/reset-password?token=" + token;
+
+			// 4. Use your Azure service to email the link
+			// Assuming your service has a method like this:
+			emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+		}
+
+		// Always return a generic success message to prevent "email enumeration" security
+		// risks.
+		// (Hackers can't use this form to guess which emails are registered in your
+		// database).
+		redirectAttributes.addFlashAttribute("messageSuccess",
+				"If an account with that email exists, a password reset link has been sent.");
+		return "redirect:/login";
 	}
 
 }
