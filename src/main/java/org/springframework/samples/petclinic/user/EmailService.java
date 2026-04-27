@@ -19,8 +19,13 @@ public class EmailService {
 
 	private String senderEmail;
 
-	public EmailService(@Value("${azure.communication.connection-string}") String connectionString) {
-		this.emailClient = new EmailClientBuilder().connectionString(connectionString).buildClient();
+	public EmailService(@Value("${azure.communication.connection-string:}") String connectionString) {
+		if (connectionString != null && !connectionString.isBlank()) {
+			this.emailClient = new EmailClientBuilder().connectionString(connectionString).buildClient();
+		}
+		else {
+			this.emailClient = null;
+		}
 	}
 
 	public void sendInvitation(String toEmail, String customerName, String inviteLink) {
@@ -32,6 +37,7 @@ public class EmailService {
 					+ "You've been invited to access the WeFixCar customer portal.\n\n" + "Set up your account here: "
 					+ inviteLink + "\n\nThis link expires in 48 hours.\n\nWeFixCar Team");
 
+		if (emailClient == null) return;
 		SyncPoller<EmailSendResult, EmailSendResult> poller = emailClient.beginSend(message, null);
 		poller.waitForCompletion();
 	}
