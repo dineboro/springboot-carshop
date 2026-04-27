@@ -50,6 +50,7 @@ _site/
 ###claude###
 /.claude
 
+
 # Local environment secrets
 .env
 *.env
