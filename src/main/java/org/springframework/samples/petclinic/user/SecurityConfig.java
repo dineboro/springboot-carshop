@@ -61,7 +61,7 @@ public class SecurityConfig {
 				.hasAnyRole("ADMIN", "MANAGER")
 
 				// Public pages anyone can see
-				.requestMatchers("/", "/login", "/css/**", "/images/**", "/webjars/**", "/favicon.ico")
+				.requestMatchers("/", "/login", "/resources/**", "/webjars/**", "/favicon.ico")
 				.permitAll()
 
 				// Only SUPER_ADMIN users can add new schools
