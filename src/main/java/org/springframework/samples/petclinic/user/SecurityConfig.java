@@ -60,13 +60,8 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/service-catalog/new", "/service-catalog/*/edit")
 				.hasAnyRole("ADMIN", "MANAGER")
 
-				// Allow all other GET requests (view/read pages)
-				.requestMatchers(HttpMethod.GET)
-				.permitAll()
-
 				// Public pages anyone can see
-				.requestMatchers("/", "/schools/**", "/register-student", "/css/**", "/images/**", "/recipes/**",
-						"/recipes/new")
+				.requestMatchers("/", "/login", "/css/**", "/images/**", "/webjars/**", "/favicon.ico")
 				.permitAll()
 
 				// Only SUPER_ADMIN users can add new schools

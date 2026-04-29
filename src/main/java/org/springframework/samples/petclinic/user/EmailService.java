@@ -17,8 +17,6 @@ public class EmailService {
 	@Value("${azure.communication.sender-email}")
 	private String senderAddress;
 
-	private String senderEmail;
-
 	public EmailService(@Value("${azure.communication.connection-string:}") String connectionString) {
 		if (connectionString != null && !connectionString.isBlank()) {
 			this.emailClient = new EmailClientBuilder().connectionString(connectionString).buildClient();
@@ -77,12 +75,13 @@ public class EmailService {
 		String plainTextContent = "Please reset your password using this link: " + resetLink
 				+ "\n\nIf you did not request this, please ignore this email.";
 
-		EmailMessage message = new EmailMessage().setSenderAddress(this.senderEmail)
+		EmailMessage message = new EmailMessage().setSenderAddress(this.senderAddress)
 			.setToRecipients(toAddress)
 			.setSubject(subject)
 			.setBodyHtml(htmlContent)
 			.setBodyPlainText(plainTextContent);
 
+		if (emailClient == null) return;
 		try {
 			// Send the email and wait for the operation to complete
 			SyncPoller<EmailSendResult, EmailSendResult> poller = emailClient.beginSend(message, null);
